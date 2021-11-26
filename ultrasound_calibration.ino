@@ -32,7 +32,7 @@ void distance() {
 void loop() {
     buttonState = digitalRead(buttonPin);
     if (buttonState == HIGH) {
-        // Run distance function
+        // run distance function
         distance();
     }
 }
