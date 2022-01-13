@@ -6,3 +6,7 @@ forward,0.5
 turn,90
 forward,0.5
 turn,90
+wait,0
+take_picture,hi_world
+forward,0.5
+exit,0
