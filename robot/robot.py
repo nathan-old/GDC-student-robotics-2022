@@ -1,19 +1,20 @@
 from state import StateManager
+import sr.robot3 as sr
 
-def main(ab=False):
+
+def main(autoboot=False):
     sm = StateManager()
-    res = sm.main(ab)
+    res = sm.main(autoboot)
     print("returned code" + str(res))
     if res == -1:
-        print("restarting...")
-        # TODO: restart hardware
-        main(ab)
+        print("Handler Error")
     elif res == 1:
-        print("error")
+        print("Program error")
     elif res == 2:
-        print("logic error")
+        print("Unaccounted logic error")
     else:
-        print("finished")
+        pass
+    
+    return
 
 main()
-    
