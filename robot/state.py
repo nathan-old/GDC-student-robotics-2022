@@ -1,32 +1,36 @@
-import threading
 import time
 from robot_module import RobotModule
 from enum import Enum
 from buzzer import BuzzerManager
+from config import Config
 import sr.robot3 as sr
 
+EXTRA_LONG_BEEP = 1
+LONG_BEEP = 0.5
+SHORT_BEEP = 0.1
+
 STATUS_CODE_SEQUENCES = {
-    "PB_C": [[sr.Note.C6, 0.25], [sr.Note.C6, 0.2], [0, 0.25],
-             [sr.Note.C7, 1]],  # Preboot comp mode
-    "PB_D": [[sr.Note.C6, 0.25], [sr.Note.C6, 0.2], [0, 0.25],
-             [sr.Note.C6, 1]],  # Preboot dev mode
-    "BC": [[sr.Note.C6, 0.5], [0, 0.25], [sr.Note.C6, 0.5], [0, 0.25],
-           [sr.Note.C6, 0.5]],  # Boot complete
-    "BE": [[sr.Note.E6, 0.5], [0, 0.5], [sr.Note.E6, 0.5], [0, 0.25],
-           [sr.Note.E6, 0.5], [0, 1]],  # Boot error
-    "IE": [[sr.Note.G6, 0.1], [sr.Note.E6, 0.1], [sr.Note.G6, 0.1],
-           [sr.Note.E6, 0.1], [sr.Note.G6, 0.25], [sr.Note.G6, 0.25],
-           [0, 1]],  # Initialization error
-    "BD": [[sr.Note.G6, 0.1], [sr.Note.G6, 0.1]],  # Begining Diagnostics
-    "DF": [[i, 0.2] for i in range(4000, 1000, 250)],  # Diagnostic failure
-    "DG": [[i, 0.2] for i in range(1000, 4000, 250)],  # Diagnostic good
-    "MF": [[sr.Note.C6, 0.1], [sr.Note.C6, 0.1], [sr.Note.B6, 0.1],
-           [sr.Note.B6, 0.1], [sr.Note.G6, 0.25], [sr.Note.G6, 0.25],
-           [0, 1]],  # main function error
+    "CompMode": [[sr.Note.C6, SHORT_BEEP], [sr.Note.C6, SHORT_BEEP],
+                 [0, SHORT_BEEP], [sr.Note.C7, EXTRA_LONG_BEEP]],
+    "DevMode": [[sr.Note.C6, SHORT_BEEP], [sr.Note.C6, SHORT_BEEP],
+                [0, SHORT_BEEP], [sr.Note.C6, EXTRA_LONG_BEEP]],
+    "BootDone": [[sr.Note.C6, SHORT_BEEP], [sr.Note.C6, SHORT_BEEP],
+                 [sr.Note.C6, SHORT_BEEP]],
+    "BootError": [[sr.Note.E6, LONG_BEEP], [0, LONG_BEEP],
+                  [sr.Note.E6, LONG_BEEP], [sr.Note.E6, LONG_BEEP]],
+    "InitError": [[sr.Note.G6, SHORT_BEEP], [sr.Note.E6, SHORT_BEEP],
+                  [sr.Note.G6, SHORT_BEEP]],
+    "BeginDiagnostics": [[sr.Note.G6, SHORT_BEEP], [sr.Note.G6, SHORT_BEEP]],
+    "DiagnosticsFail": [[sr.Note.A6, SHORT_BEEP], [sr.Note.G6, LONG_BEEP]],
+    "DiagnosticsPass": [[sr.Note.G6, LONG_BEEP]],
+    "MainLoopError": [[sr.Note.C6, SHORT_BEEP], [sr.Note.C6, SHORT_BEEP],
+                      [sr.Note.B6, SHORT_BEEP], [sr.Note.B6, SHORT_BEEP],
+                      [sr.Note.G6, LONG_BEEP], [sr.Note.G6, LONG_BEEP]]
 }
 
 VERBOSE = True
 VERBOSE_AUDIO = True
+
 
 class States(Enum):
     PREBOOT = -1,
@@ -69,16 +73,25 @@ class StateManager(RobotModule):
             return
         self.running = False
 
-        # TODO: shutdown all modules
-        return code
-
-    def led_sweep(self, count=5):
-        for _ in range(count):
+        if self.LEDs is not None:
             for LED in self.LEDs:
-                LED.is_enabled = not LED.is_enabled
-                time.sleep(0.05)
-            self.LEDs.reverse()
-            time.sleep(0.25)
+                LED.is_enabled = False
+            if code == 0:
+                self.LEDs[0].is_enabled = True
+            elif code == 1:
+                self.LEDs[1].is_enabled = True
+            elif code == -1:
+                self.LEDs[2].is_enabled = True
+
+        time.sleep(1)
+        if self.buzzerManager is not None:
+            self.buzzerManager.play_sequence([
+                [sr.Note.C8, SHORT_BEEP], [sr.Note.C8, SHORT_BEEP],
+            ])
+
+        if self.movementManager is not None:
+            self.movementManager.shutdown()
+        return code
 
     def main(self, autoboot=False):
         self.running = True
@@ -88,25 +101,32 @@ class StateManager(RobotModule):
                 self.set_state(States.BOOTING)
                 try:
                     self.robot = sr.Robot(auto_start=autoboot, verbose=VERBOSE)
-                    self.robot.wait_start()  # wait for the robot to start
-                    self.robot._log_discovered_boards
-                    self.LEDs = [self.robot.power_board.outputs[sr.OUT_L0], self.robot.power_board.outputs[sr.OUT_L1], self.robot.power_board.outputs[sr.OUT_L2], self.robot.power_board.outputs[sr.OUT_L3]]
+
+                    self.config = Config()
+                    self.config.load_disk(
+                        str(self.robot.usbkey) + "/config.json")
+                    self.config.save_disk(
+                        str(self.robot.usbkey) + "/config.json")
+
+                    self.LEDs = [
+                        self.robot.power_board.outputs[sr.OUT_L0],
+                        self.robot.power_board.outputs[sr.OUT_L1],
+                        self.robot.power_board.outputs[sr.OUT_L2],
+                        self.robot.power_board.outputs[sr.OUT_L3]
+                    ]
                     print("Confirmed start")
 
                     self.buzzerManager = BuzzerManager(
-                        self.robot.power_board.piezo)
-                    self.buzzerManager.play_sequence([[500, 0.5]])
-                    self.led_sweep(5)
+                        self.robot.power_board.piezo,
+                        self.config.min_time_between_buzzes)
+                    if self.config.audio_debug_level > 0:
+                        if (self.robot.mode == sr.DEV):
+                            self.buzzerManager.play_sequence(
+                                STATUS_CODE_SEQUENCES["DevMode"])
+                        else:
+                            self.buzzerManager.play_sequence(
+                                STATUS_CODE_SEQUENCES["CompMode"])
 
-                    if (self.robot.mode == sr.DEV):
-                        self.buzzerManager.play_sequence(
-                            STATUS_CODE_SEQUENCES["PB_D"])
-                    else:
-                        self.buzzerManager.play_sequence(
-                            STATUS_CODE_SEQUENCES["PB_C"])
-
-                    self.buzzerManager.play_sequence(
-                        STATUS_CODE_SEQUENCES["BC"])
                 except Exception as e:
                     self.errors.append(e)
                     self.failure_state = States.BOOTING
@@ -126,41 +146,41 @@ class StateManager(RobotModule):
                     self.movementManager = MovementController(self.robot)
                     #self.cameraManager = CameraManager(self.robot)
 
-                    self.movementManager.start_loop();
+                    self.movementManager.start_loop()
                     #self.cameraManager.start_loop();
                 except Exception as e:
                     self.errors.append(e)
                     self.failure_state = States.INITIALIZING
                     self.set_state(States.ERROR)
-                    continue;
+                    continue
                 # we have initialized our modules, now we can start the diagnostics
-                self.buzzerManager.play_sequence([[sr.Note.C6, 0.5]])
                 self.set_state(States.RUNNING_DIAGNOTIC)
             if (self.state == States.RUNNING_DIAGNOTIC):
-                if VERBOSE_AUDIO:
+                if self.config.audio_debug_level > 0:
                     self.buzzerManager.play_sequence(
-                        STATUS_CODE_SEQUENCES["BD"])
+                        STATUS_CODE_SEQUENCES["BeginDiagnostics"])
                 try:
                     # TODO: this is where we would start the diagnostics, for now we just do a dance
-                   # self.movementManager.turn_angle(90)
-                    #self.movementManager.turn_angle(-90)
-                    #self.movementManager.wait_for_queue_clearance()
-                    None;
+                    self.movementManager.turn_angle(90)
+                    self.movementManager.turn_angle(-90)
+                    self.movementManager.wait_for_queue_clearance()
                 except Exception as e:
                     self.errors.append(e)
                     self.failure_state = States.RUNNING_DIAGNOTIC
                     self.set_state(States.ERROR)
                     continue
                 # we have finished the diagnostics, now we can go back to idle
-                self.buzzerManager.play_sequence(STATUS_CODE_SEQUENCES["DG"])
+                self.buzzerManager.play_sequence(
+                    STATUS_CODE_SEQUENCES["DiagnosticsPass"])
                 self.set_state(States.IDLE)
             if (self.state == States.IDLE):
                 try:
-                    self.buzzerManager.play_sequence([
-                        [3000, 0.1, 4000, 0.4, 6000, 1]
-                    ])
-                    # we have finished the setup, start the main loop
                     print("ALL DONE, REACHED IDLE STATE")
+
+                    self.buzzerManager.play_sequence(
+                        [i, 0.05] for i in range(1000, 5000, 150))
+
+                    # we have finished the setup, start the main loop
                     with open('instructions.txt', 'r') as file_:
                         instructions = file_.readlines()
 
@@ -169,19 +189,19 @@ class StateManager(RobotModule):
                     for i in range(len(instructions)):
                         if instructions[i][0] == 'forward':
                             self.movementManager.forward(
-                                int(instructions[i][1]))
+                                float(instructions[i][1]))
                         if instructions[i][0] == 'turn':
                             self.movementManager.turn_angle(
-                                int(instructions[i][1]))
+                                float(instructions[i][1]))
                         if instructions[i][0] == 'wait':
                             self.movementManager.wait_for_queue_clearance()
                         if instructions[i][0] == 'take_picture':
                             self.robot.camera.save(
-                                instructions[i][1] +
+                                str(self.robot.usbkey) + "/" + instructions[i][1] +
                                 ".jpg")  # TODO: use the camera manager
                         if instructions[i][0] == 'move':
-                            self.movementManager.move(int(instructions[i][1]),
-                                                      int(instructions[i][2]))
+                            self.movementManager.move(float(
+                                instructions[i][1]))
                         if instructions[i][0] == 'exit':
                             self.shutdown(int(instructions[i][1]))
 
@@ -194,7 +214,8 @@ class StateManager(RobotModule):
                     continue
 
             if (self.state == States.ERROR):
-                print("entered error state during state: " + str(self.state))
+                print("entered error state during state: " +
+                      str(self.failure_state))
                 if VERBOSE:
                     print("errors:")
                     for i in range(len(self.errors)):
@@ -202,33 +223,31 @@ class StateManager(RobotModule):
                 if (self.failure_state == States.BOOTING):
                     for i in range(5):
                         self.buzzerManager.play_sequence(
-                            STATUS_CODE_SEQUENCES["BE"])
+                            STATUS_CODE_SEQUENCES["BootError"])
                         time.sleep(1.5)
+                    return self.shutdown(1)
                 if (self.failure_state == States.INITIALIZING):
                     for i in range(5):
                         self.buzzerManager.play_sequence(
-                            STATUS_CODE_SEQUENCES["IE"])
+                            STATUS_CODE_SEQUENCES["InitError"])
                         time.sleep(1.5)
+                    return self.shutdown(1)
                 elif (self.failure_state == States.RUNNING_DIAGNOTIC):
-                    self.buzzerManager.play_sequence(
-                        STATUS_CODE_SEQUENCES["DF"])
-                elif (self.failure_state == States.IDLE):
-                    sweeper_thread = threading.Thread(self.led_sweep(350)).start()
-                    for _ in range(25):
+                    for i in range(5):
                         self.buzzerManager.play_sequence(
-                            STATUS_CODE_SEQUENCES["MF"])
+                            STATUS_CODE_SEQUENCES["DiagnosticsFail"])
                         time.sleep(1.5)
-                    return 1
+                    return self.shutdown(1)
+                elif (self.failure_state == States.IDLE):
+                    for _ in range(5):
+                        self.buzzerManager.play_sequence(
+                            STATUS_CODE_SEQUENCES["MainLoopError"])
+                        time.sleep(1.5)
+                    return self.shutdown(1)
                 elif (self.failure_state == States.ERROR):
-                    return -1
-                    # Something is very wrong
+                    return self.shutdown(-1)
                 elif (self.failure_state == States.FINISHED):
-                    return 0
-                    # Everything is fine, we are done
+                    return self.shutdown(0)
                 else:
                     print("Unknown failure state: " + str(self.failure_state))
-
-                time.sleep(2)
-                self.set_state(States.FINISHED)
-
-                return 0
+                    return self.shutdown(-1)
