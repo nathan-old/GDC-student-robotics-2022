@@ -88,7 +88,7 @@ class RemoteController(RobotModule):
             s_value = int(arr[3])
             b_value = int(arr[4]) 
             t_value = int(arr[5]) 
-            shutdown = int(arr[6]) >= 0.5
+            shutdown = bool(arr[6])
             if shutdown:
                 self.running = False
                 self.serial.close()

@@ -15,10 +15,9 @@
 //
 // Posts in the series will be titled - How To Read an RC Receiver With A Microcontroller
 
-// See also http://rcarduino.blogspot.co.uk/2012/04/how-to-read-multiple-rc-channels-draft.html 
+// See also http://rcarduino.blogspot.co.uk/2012/04/how-to-read-multiple-rc-channels-draft.html
 
-
-#define NEUTRAL_POSITION 1500 
+#define NEUTRAL_POSITION 1500
 
 #define SWITCH_SIGNAL_IN 16
 #define SWITCH_SIGNAL_IN_PIN 0
@@ -46,19 +45,20 @@ volatile boolean bNewAileronSignal = false;
 
 #define ELEVATOR_SIGNAL_IN 19
 #define ELEVATOR_SIGNAL_IN_PIN 3
-volatile int nElevatorIn = NEUTRAL_POSITION; 
-volatile unsigned long ulEStartPeriod = 0; 
+volatile int nElevatorIn = NEUTRAL_POSITION;
+volatile unsigned long ulEStartPeriod = 0;
 volatile boolean bNewElevatorSignal = false;
 
 #define RUDDER_SIGNAL_IN 20
 #define RUDDER_SIGNAL_IN_PIN 4
-volatile int nRudderln = NEUTRAL_POSITION; 
-volatile unsigned long ulRStartPeriod = 0; 
+volatile int nRudderln = NEUTRAL_POSITION;
+volatile unsigned long ulRStartPeriod = 0;
 volatile boolean bNewRudderSignal = false;
 
 int inPin = 13;
 
-void setup() {
+void setup()
+{
   pinMode(inPin, INPUT);
   attachPinChangeInterrupt(ELEVATOR_SIGNAL_IN, calcElevator, HIGH);
   attachPinChangeInterrupt(AILERON_SIGNAL_IN, calcAileron, HIGH);
@@ -69,47 +69,58 @@ void setup() {
   Serial.begin(9600);
 }
 
-void loop() {
- if(bNewAileronSignal) {
-   Serial.print(nAileronIn);
-   Serial.print(","); 
-   bNewAileronSignal = false;
- }
- if(bNewElevatorSignal) {
-   Serial.print(nElevatorIn);
-   Serial.print(","); 
-   bNewElevatorSignal = false;
- }
- if(bNewRudderSignal) {
-   Serial.print(nRudderln);
-   Serial.print(",");
-   bNewRudderSignal = false;
- }
- if(bNewSwitchSignal) {
-   Serial.print(nSwitchIn);
-   Serial.print(",");
-   bNewSwitchSignal = false;
- }
- if(bNewBindSignal) {
-   Serial.print(nBindIn);
-   Serial.print(",");
-   bNewBindSignal = false;
- }
-  if(bNewThrottleSignal) {
-   Serial.print(nThrottleIn);
-   Serial.print(",");
-   bNewThrottleSignal = false;
- }
- Serial.println(digitalRead(inPin));
- delay(100);
+void loop()
+{
+  if (bNewAileronSignal)
+  {
+    Serial.print(nAileronIn);
+    Serial.print(",");
+    bNewAileronSignal = false;
+  }
+  if (bNewElevatorSignal)
+  {
+    Serial.print(nElevatorIn);
+    Serial.print(",");
+    bNewElevatorSignal = false;
+  }
+  if (bNewRudderSignal)
+  {
+    Serial.print(nRudderln);
+    Serial.print(",");
+    bNewRudderSignal = false;
+  }
+  if (bNewSwitchSignal)
+  {
+    Serial.print(nSwitchIn);
+    Serial.print(",");
+    bNewSwitchSignal = false;
+  }
+  if (bNewBindSignal)
+  {
+    Serial.print(nBindIn);
+    Serial.print(",");
+    bNewBindSignal = false;
+  }
+  if (bNewThrottleSignal)
+  {
+    Serial.print(nThrottleIn);
+    Serial.print(",");
+    bNewThrottleSignal = false;
+  }
+  Serial.println(digitalRead(inPin));
+  delay(100);
 }
 
-void calcBind() {
-  if(digitalRead(BIND_SIGNAL_IN_PIN) == HIGH) {
+void calcBind()
+{
+  if (digitalRead(BIND_SIGNAL_IN_PIN) == HIGH)
+  {
     ulBStartPeriod = micros();
   }
-  else {
-    if(ulBStartPeriod && (bNewBindSignal == false)) {
+  else
+  {
+    if (ulBStartPeriod && (bNewBindSignal == false))
+    {
       nBindIn = (int)(micros() - ulBStartPeriod);
       ulBStartPeriod = 0;
       bNewBindSignal = true;
@@ -117,12 +128,16 @@ void calcBind() {
   }
 }
 
-void calcSwitch() {
-  if(digitalRead(SWITCH_SIGNAL_IN_PIN) == HIGH) {
+void calcSwitch()
+{
+  if (digitalRead(SWITCH_SIGNAL_IN_PIN) == HIGH)
+  {
     ulSStartPeriod = micros();
   }
-  else {
-    if(ulSStartPeriod && (bNewSwitchSignal == false)) {
+  else
+  {
+    if (ulSStartPeriod && (bNewSwitchSignal == false))
+    {
       nSwitchIn = (int)(micros() - ulSStartPeriod);
       ulSStartPeriod = 0;
       bNewSwitchSignal = true;
@@ -130,12 +145,16 @@ void calcSwitch() {
   }
 }
 
-void calcElevator() {
-  if(digitalRead(ELEVATOR_SIGNAL_IN_PIN) == HIGH) {
+void calcElevator()
+{
+  if (digitalRead(ELEVATOR_SIGNAL_IN_PIN) == HIGH)
+  {
     ulEStartPeriod = micros();
   }
-  else {
-    if(ulEStartPeriod && (bNewElevatorSignal == false)) {
+  else
+  {
+    if (ulEStartPeriod && (bNewElevatorSignal == false))
+    {
       nElevatorIn = (int)(micros() - ulEStartPeriod);
       ulEStartPeriod = 0;
       bNewElevatorSignal = true;
@@ -143,12 +162,16 @@ void calcElevator() {
   }
 }
 
-void calcAileron() {
-  if(digitalRead(AILERON_SIGNAL_IN_PIN) == HIGH) {
+void calcAileron()
+{
+  if (digitalRead(AILERON_SIGNAL_IN_PIN) == HIGH)
+  {
     ulAStartPeriod = micros();
   }
-  else {
-    if(ulAStartPeriod && (bNewAileronSignal == false)) {
+  else
+  {
+    if (ulAStartPeriod && (bNewAileronSignal == false))
+    {
       nAileronIn = (int)(micros() - ulAStartPeriod);
       ulAStartPeriod = 0;
       bNewAileronSignal = true;
@@ -156,12 +179,16 @@ void calcAileron() {
   }
 }
 
-void calcRudder() {
-  if(digitalRead(RUDDER_SIGNAL_IN_PIN) == HIGH) {
+void calcRudder()
+{
+  if (digitalRead(RUDDER_SIGNAL_IN_PIN) == HIGH)
+  {
     ulRStartPeriod = micros();
   }
-  else {
-    if(ulRStartPeriod && (bNewRudderSignal == false)) {
+  else
+  {
+    if (ulRStartPeriod && (bNewRudderSignal == false))
+    {
       nRudderln = (int)(micros() - ulRStartPeriod);
       ulRStartPeriod = 0;
       bNewRudderSignal = true;
@@ -169,12 +196,16 @@ void calcRudder() {
   }
 }
 
-void calcThrottle() {
-  if(digitalRead(THROTTLE_SIGNAL_IN_PIN) == HIGH) {
+void calcThrottle()
+{
+  if (digitalRead(THROTTLE_SIGNAL_IN_PIN) == HIGH)
+  {
     ulTStartPeriod = micros();
   }
-  else {
-    if(ulTStartPeriod && (bNewThrottleSignal == false)) {
+  else
+  {
+    if (ulTStartPeriod && (bNewThrottleSignal == false))
+    {
       nThrottleIn = (int)(micros() - ulTStartPeriod);
       ulTStartPeriod = 0;
       bNewThrottleSignal = true;
