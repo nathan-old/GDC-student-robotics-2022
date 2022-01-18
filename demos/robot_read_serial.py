@@ -40,7 +40,8 @@ R.wait_start()
 while True:
     ##    print(i)
     arr = ser.readline().decode().rstrip().split(',')
-
+    if len(arr) < 7:
+        continue
     x_value, y_value, r_value, s_value, b_value, t_value = int(arr[0]), int(
         arr[1]), int(arr[2]), int(arr[3]), int(arr[4]), int(arr[5])
     if s_value < 1500:
