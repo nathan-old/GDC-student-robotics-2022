@@ -42,8 +42,11 @@ while True:
     arr = ser.readline().decode().rstrip().split(',')
     if len(arr) < 7:
         continue
-    x_value, y_value, r_value, s_value, b_value, t_value = int(arr[0]), int(
-        arr[1]), int(arr[2]), int(arr[3]), int(arr[4]), int(arr[5])
+    x_value, y_value, r_value, s_value, b_value, t_value, shutdown = int(arr[0]), int(arr[1]), int(arr[2]),int(arr[3]),int(arr[4]),int(arr[5]),int(arr[6])
+    if shutdown == 0:
+        shutdown_state = True
+    else:
+        shutdown_state = False
     if s_value < 1500:
         s_state = True
     else:
