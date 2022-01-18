@@ -4,6 +4,7 @@ from enum import Enum
 from buzzer import BuzzerManager
 from config import Config
 import sr.robot3 as sr
+import serial.tools.list_ports
 
 EXTRA_LONG_BEEP = 1
 LONG_BEEP = 0.5
@@ -30,6 +31,7 @@ STATUS_CODE_SEQUENCES = {
 
 VERBOSE = True
 VERBOSE_AUDIO = True
+USE_REMOTE = True # ONLY FOR DEBUGGING/TESTING PURPOSES WILL BE REMOVED FROM CODE LONG BEFORE COMPETITION
 
 
 class States(Enum):
@@ -56,6 +58,7 @@ class StateManager(RobotModule):
         self.movementManager = None
         self.cameraManager = None
         self.buzzerManager = None
+        self.remoteController = None
         self.failure_state = None
         self.LEDs = []
         self.errors = []
@@ -138,6 +141,7 @@ class StateManager(RobotModule):
                 try:
                     #from mapper import MapperManager
                     from movement import MovementController
+                    from remote import RemoteController
                     #from pathfinder import PathfinderManager
                     #from camera import CameraManager
 
@@ -145,9 +149,23 @@ class StateManager(RobotModule):
                     #self.pathfinderManager = PathfinderManager(self.robot, self.mapperManager)
                     self.movementManager = MovementController(self.robot)
                     #self.cameraManager = CameraManager(self.robot)
-
                     self.movementManager.start_loop()
                     #self.cameraManager.start_loop();
+
+                    ports = serial.tools.list_ports.comports()
+                    if self.robot.mode == sr.DEV and USE_REMOTE:
+                        print("Trying to find RemoteController")
+                        for port, desc, hwid in sorted(ports):
+                            target_serial_id = "7523031383335161C151"
+                            serial_id = hwid.split(' ')[2][4:]
+                            if VERBOSE:
+                                print("Device: Port={}, Description={}, HardwareID={}".format(port, desc, hwid))
+                            if serial_id == target_serial_id:
+                                self.remoteController = RemoteController(self.robot, self.movementManager, serial_id, port, 9600, self.shutdown)
+                                break     
+
+                    if self.remoteController is None:
+                        print("No remote controller found")                   
                 except Exception as e:
                     self.errors.append(e)
                     self.failure_state = States.INITIALIZING
@@ -179,34 +197,10 @@ class StateManager(RobotModule):
 
                     self.buzzerManager.play_sequence(
                         [i, 0.05] for i in range(1000, 5000, 150))
-
-                    # we have finished the setup, start the main loop
-                    with open('instructions.txt', 'r') as file_:
-                        instructions = file_.readlines()
-
-                    for i in range(len(instructions)):
-                        instructions[i] = instructions[i].strip().split(',')
-                    for i in range(len(instructions)):
-                        if instructions[i][0] == 'forward':
-                            self.movementManager.forward(
-                                float(instructions[i][1]))
-                        if instructions[i][0] == 'turn':
-                            self.movementManager.turn_angle(
-                                float(instructions[i][1]))
-                        if instructions[i][0] == 'wait':
-                            self.movementManager.wait_for_queue_clearance()
-                        if instructions[i][0] == 'take_picture':
-                            self.robot.camera.save(
-                                str(self.robot.usbkey) + "/" + instructions[i][1] +
-                                ".jpg")  # TODO: use the camera manager
-                        if instructions[i][0] == 'move':
-                            self.movementManager.move(float(
-                                instructions[i][1]))
-                        if instructions[i][0] == 'exit':
-                            self.shutdown(int(instructions[i][1]))
-
+                    if USE_REMOTE:
+                        self.remoteController.start_listening()
                     self.movementManager.wait_for_queue_clearance()
-                    return self.shutdown(0)  # all went well!
+                    # Rc controller will change the state to Finished and will shutdown when button pressed 
                 except Exception as e:
                     self.errors.append(e)
                     self.failure_state = States.IDLE

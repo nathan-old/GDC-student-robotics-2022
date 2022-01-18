@@ -4,7 +4,14 @@ from threading import Thread, RLock
 
 
 class MovementCommand:
-    def __init__(self, command, rpm=None, distance=None, angle=None):
+
+    def __init__(self,
+                 command,
+                 rpm=None,
+                 distance=None,
+                 angle=None,
+                 power=None,
+                 motor_index=None):
         if (command == "move"):
             self.code = 0
             self.rpm = rpm
@@ -12,6 +19,10 @@ class MovementCommand:
         elif (command == "turn_angle"):
             self.code = 1
             self.angle = angle
+        elif (command == "power"):
+            self.code = 2
+            self.motor_index = motor_index
+            self.power = power
         else:  # TODO: add helper command like forward that uses sensors.forward() to orient the robot and then move forward distance amount
             raise Exception("Invalid command")
 
@@ -20,6 +31,8 @@ class MovementCommand:
             M_Master._move(self.rpm, self.distance)
         elif (self.code == 1):
             M_Master._turn_angle(self.angle)
+        elif (self.code == 2):
+            M_Master._set_motor_power(self.power, self.motor_index)
         else:
             raise Exception("Invalid command")
         return True
@@ -51,7 +64,7 @@ class MovementController(RobotModule):
     def start_loop(self):
         self.running = True
         return Thread(target=self.__loop).start()
-    
+
     def shutdown(self):
         self.running = False
 
@@ -87,6 +100,11 @@ class MovementController(RobotModule):
         with self.lock:
             self.queue.append(MovementCommand("turn_angle", None, None, angle))
 
+    def set_power(self, power, index):
+        with self.lock:
+            self.queue.append(
+                MovementCommand("power", None, None, None, power, index))
+
     def forward(self, rpm):
         self.move(1, rpm)
 
@@ -117,7 +135,7 @@ class MotorMaster():
 
     # YOU SHOULD NOT BE CALLING THESE (PEP 8 - https://www.python.org/dev/peps/pep-0008/#method-names-and-instance-variables)
     # YOU SHOULD BE CALLING THE QUEUE METHODS ON MovementController INSTEAD
-    def __set_power(self, power=0, wheel_index=None):
+    def _set_power(self, power=0, wheel_index=None):
         if (wheel_index == None):
             for wheel in self.wheels:
                 wheel.power = power
@@ -136,14 +154,16 @@ class MotorMaster():
 
     def _move(self, distance, rpm=140):
         time_, power = self.__calculate_move(distance, rpm)
-        print("Moving " + str(distance) + " meters, " + str(time_) + " seconds, at " + str(rpm) + " rpm, with power " + str(power))
-        self.__set_power(power)
+        print("Moving " + str(distance) + " meters, " + str(time_) +
+              " seconds, at " + str(rpm) + " rpm, with power " + str(power))
+        self._set_power(power)
         time.sleep(time_)
-        self.__set_power(0)
+        self._set_power(0)
 
     def _turn_angle(self, angle):
         if angle > 180 and self.wrap_angles:
             angle = 180 - angle
         distance = angle * ((math.pi * 2 * self.arm_radius) / 360)
-        print("Turning " + str(angle) + " degrees, " + str(distance) + " meters")
+        print("Turning " + str(angle) + " degrees, " + str(distance) +
+              " meters")
         self._move(distance)
