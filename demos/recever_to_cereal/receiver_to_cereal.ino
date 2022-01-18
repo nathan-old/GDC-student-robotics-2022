@@ -56,7 +56,10 @@ volatile int nRudderln = NEUTRAL_POSITION;
 volatile unsigned long ulRStartPeriod = 0; 
 volatile boolean bNewRudderSignal = false;
 
+int inPin = 13;
+
 void setup() {
+  pinMode(inPin, INPUT);
   attachPinChangeInterrupt(ELEVATOR_SIGNAL_IN, calcElevator, HIGH);
   attachPinChangeInterrupt(AILERON_SIGNAL_IN, calcAileron, HIGH);
   attachPinChangeInterrupt(RUDDER_SIGNAL_IN, calcRudder, HIGH);
@@ -93,9 +96,11 @@ void loop() {
    bNewBindSignal = false;
  }
   if(bNewThrottleSignal) {
-   Serial.println(nThrottleIn);
+   Serial.print(nThrottleIn);
+   Serial.print(",");
    bNewThrottleSignal = false;
  }
+ Serial.println(digitalRead(inPin));
  delay(100);
 }
 
