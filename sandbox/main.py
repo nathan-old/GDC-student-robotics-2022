@@ -266,9 +266,5 @@ markers = [
     MapMarker("o", Position3D((718 * 7), 0, 0), None),
 ]
 map = Map(MAP_WIDTH, MAP_HEIGHT, [], markers, Position3D(500, 0, 500), 90)
-while map.robot_position.y < map.map_length - 100:
-    map.plot()
-    map.robot_orientation += 5
-    time.sleep(0.25)
-
+map.plot()
 # %%

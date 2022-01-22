@@ -6,7 +6,7 @@ class Config():
     def __init__(self):
         self.version = "0.0.1"
 
-        self.audio_debug_level = 1  # 0: no debug, 1: debug error, info, 2: debug error, info, trace
+        self.audio_debug_level = 2  # 0: no debug, 1: debug error, info, 2: debug error, info, trace
         self.motor_boards = ['SR0PJ1W',
                              'SR0VG1M']  # the id of the motor boards
         self.wheel_count = 3  # number of wheels on the robot

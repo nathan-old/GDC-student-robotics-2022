@@ -32,7 +32,7 @@ class MovementCommand:
         elif (self.code == 1):
             M_Master._turn_angle(self.angle)
         elif (self.code == 2):
-            M_Master._set_motor_power(self.power, self.motor_index)
+            M_Master._set_power(self.power, self.motor_index)
         else:
             raise Exception("Invalid command")
         return True
@@ -42,17 +42,19 @@ class MovementController(RobotModule):
 
     def __init__(self,
                  robot,
+                 markerManager,
                  wheel_circumference=0.15,
                  arm_radius=0.18,
                  wrap_angles=False,
                  queue_max_length=30,
                  time_between_commands=0,
                  loop_delay=0.1,
-                 motor_boards=['SR0VG1M']):
+                 motor_boards=['SR0PJ1W', 'SR0VG1M']):
         super().__init__("MovementController", "Movement controller", "0.0.1",
                          "0.0.0", "1.0.0")
         self.__M_Master = MotorMaster(robot, wheel_circumference, arm_radius,
                                       wrap_angles, motor_boards)
+        self.markerManager = markerManager
         self.queue_max_length = queue_max_length
         self.time_between_commands = time_between_commands
         self.loop_delay = loop_delay
@@ -125,10 +127,10 @@ class MotorMaster():
         self.wheel_circumference = wheel_circumference
         self.wheel_one = self.robot.motor_boards[motor_boards[0]].motors[0]
         self.wheel_two = self.robot.motor_boards[motor_boards[0]].motors[1]
-        #self.wheel_three = self.robot.motor_boards[motor_boards[1]].motors[0]
+        self.wheel_three = self.robot.motor_boards[motor_boards[1]].motors[0]
         self.arm_radius = arm_radius
         self.wrap_angles = wrap_angles
-        self.wheels = [self.wheel_one, self.wheel_two]  #, self.wheel_three]
+        self.wheels = [self.wheel_one, self.wheel_two, self.wheel_three]
         # brake by default
         for wheel in self.wheels:
             wheel.power = 0

@@ -1,10 +1,12 @@
-import time
+import time, traceback
 from robot_module import RobotModule
 from enum import Enum
 from buzzer import BuzzerManager
 from config import Config
 import sr.robot3 as sr
 import serial.tools.list_ports
+
+ARDUINO_ID = "7523031383335161C151"
 
 EXTRA_LONG_BEEP = 1
 LONG_BEEP = 0.5
@@ -31,7 +33,7 @@ STATUS_CODE_SEQUENCES = {
 
 VERBOSE = True
 VERBOSE_AUDIO = True
-USE_REMOTE = True # ONLY FOR DEBUGGING/TESTING PURPOSES WILL BE REMOVED FROM CODE LONG BEFORE COMPETITION
+USE_REMOTE = True  # ONLY FOR DEBUGGING/TESTING PURPOSES WILL BE REMOVED FROM CODE LONG BEFORE COMPETITION
 
 
 class States(Enum):
@@ -50,6 +52,7 @@ class StateManager(RobotModule):
         super().__init__("state_manager",
                          "State manager, the main loop and logic master",
                          "0.0.1", "0.0.0", "1.0.0")
+        self.code = None
         self.running = False
         self.state = States.PREBOOT
         self.robot = None
@@ -62,6 +65,7 @@ class StateManager(RobotModule):
         self.failure_state = None
         self.LEDs = []
         self.errors = []
+        self.first_init = False
 
     def set_state(self, state):
         self.state = state
@@ -89,12 +93,18 @@ class StateManager(RobotModule):
         time.sleep(1)
         if self.buzzerManager is not None:
             self.buzzerManager.play_sequence([
-                [sr.Note.C8, SHORT_BEEP], [sr.Note.C8, SHORT_BEEP],
+                [sr.Note.C8, SHORT_BEEP],
+                [sr.Note.C8, SHORT_BEEP],
             ])
 
         if self.movementManager is not None:
             self.movementManager.shutdown()
-        return code
+
+        if self.markerManager is not None:
+            self.markerManager.shutdown()
+        
+        self.code = code
+        return self.code
 
     def main(self, autoboot=False):
         self.running = True
@@ -103,8 +113,11 @@ class StateManager(RobotModule):
                 # Begin the boot sequence
                 self.set_state(States.BOOTING)
                 try:
-                    self.robot = sr.Robot(auto_start=autoboot, verbose=VERBOSE)
-
+                    print("Starting robot")
+                    self.robot = sr.Robot(auto_start=autoboot,
+                                          verbose=VERBOSE,
+                                          ignored_ruggeduinos=[ARDUINO_ID])
+                    print("Loading config")
                     self.config = Config()
                     self.config.load_disk(
                         str(self.robot.usbkey) + "/config.json")
@@ -122,6 +135,7 @@ class StateManager(RobotModule):
                     self.buzzerManager = BuzzerManager(
                         self.robot.power_board.piezo,
                         self.config.min_time_between_buzzes)
+
                     if self.config.audio_debug_level > 0:
                         if (self.robot.mode == sr.DEV):
                             self.buzzerManager.play_sequence(
@@ -130,44 +144,55 @@ class StateManager(RobotModule):
                             self.buzzerManager.play_sequence(
                                 STATUS_CODE_SEQUENCES["CompMode"])
 
-                except Exception as e:
-                    self.errors.append(e)
+                except:
+                    self.errors.append(traceback.format_exc())
                     self.failure_state = States.BOOTING
                     self.set_state(States.ERROR)
                     continue
                 # the robot has now started and we can initialize our wrapper modules/classes
                 self.set_state(States.INITIALIZING)
             if (self.state == States.INITIALIZING):
+                time.sleep(1)
                 try:
                     #from mapper import MapperManager
                     from movement import MovementController
                     from remote import RemoteController
                     #from pathfinder import PathfinderManager
-                    #from camera import CameraManager
+                    from marker import MarkerManager
 
+                    self.markerManager = MarkerManager(self.robot)
                     #self.mapperManager = MapperManager(self.robot, 10, 10)
                     #self.pathfinderManager = PathfinderManager(self.robot, self.mapperManager)
-                    self.movementManager = MovementController(self.robot)
-                    #self.cameraManager = CameraManager(self.robot)
+                    self.movementManager = MovementController(
+                        self.robot, self.markerManager)
+
                     self.movementManager.start_loop()
-                    #self.cameraManager.start_loop();
 
                     ports = serial.tools.list_ports.comports()
-                    if self.robot.mode == sr.DEV and USE_REMOTE:
+                    if USE_REMOTE:
                         print("Trying to find RemoteController")
                         for port, desc, hwid in sorted(ports):
-                            target_serial_id = "7523031383335161C151"
                             serial_id = hwid.split(' ')[2][4:]
                             if VERBOSE:
-                                print("Device: Port={}, Description={}, HardwareID={}".format(port, desc, hwid))
-                            if serial_id == target_serial_id:
-                                self.remoteController = RemoteController(self.robot, self.movementManager, serial_id, port, 9600, self.shutdown)
-                                break     
+                                print(
+                                    "Device: Port={}, Description={}, HardwareID={}"
+                                    .format(port, desc, hwid))
+                            if serial_id == ARDUINO_ID:
+                                self.remoteController = RemoteController(
+                                    self.robot, self.movementManager,
+                                    serial_id, port, 9600, self.shutdown)
+                                break
 
-                    if self.remoteController is None:
-                        print("No remote controller found")                   
-                except Exception as e:
-                    self.errors.append(e)
+                    if USE_REMOTE:
+                        self.remoteController.start_serial()
+                        if self.remoteController is None:
+                            print("No remote controller found")
+
+                    print("Starting marker loop")
+                    self.markerManager.start_loop()
+
+                except:
+                    self.errors.append(traceback.format_exc())
                     self.failure_state = States.INITIALIZING
                     self.set_state(States.ERROR)
                     continue
@@ -179,11 +204,9 @@ class StateManager(RobotModule):
                         STATUS_CODE_SEQUENCES["BeginDiagnostics"])
                 try:
                     # TODO: this is where we would start the diagnostics, for now we just do a dance
-                    self.movementManager.turn_angle(90)
-                    self.movementManager.turn_angle(-90)
-                    self.movementManager.wait_for_queue_clearance()
-                except Exception as e:
-                    self.errors.append(e)
+                    pass
+                except:
+                    self.errors.append(traceback.format_exc())
                     self.failure_state = States.RUNNING_DIAGNOTIC
                     self.set_state(States.ERROR)
                     continue
@@ -193,16 +216,19 @@ class StateManager(RobotModule):
                 self.set_state(States.IDLE)
             if (self.state == States.IDLE):
                 try:
-                    print("ALL DONE, REACHED IDLE STATE")
+                    if not self.first_init:
+                        print("ALL DONE, REACHED IDLE STATE")
 
-                    self.buzzerManager.play_sequence(
-                        [i, 0.05] for i in range(1000, 5000, 150))
-                    if USE_REMOTE:
-                        self.remoteController.start_listening()
-                    self.movementManager.wait_for_queue_clearance()
-                    # Rc controller will change the state to Finished and will shutdown when button pressed 
-                except Exception as e:
-                    self.errors.append(e)
+                        #self.buzzerManager.play_sequence(
+                        #    [i, 0.05] for i in range(1000, 5000, 150))
+                        if USE_REMOTE and self.remoteController is not None:
+                            self.remoteController.start_listening()
+                        self.movementManager.wait_for_queue_clearance()
+                        # Rc controller will change the state to Finished and will shutdown when button pressed
+                        self.first_init = True
+                    time.sleep(5)
+                except:
+                    self.errors.append(traceback.format_exc())
                     self.failure_state = States.IDLE
                     self.set_state(States.ERROR)
                     continue
@@ -245,3 +271,5 @@ class StateManager(RobotModule):
                 else:
                     print("Unknown failure state: " + str(self.failure_state))
                     return self.shutdown(-1)
+
+        return self.code
