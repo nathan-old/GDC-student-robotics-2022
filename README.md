@@ -36,22 +36,28 @@ The diffrent status codes:
 - arduino: Contains the scripts for the arduino, apparently
 - demos: Old scripts that were in this repo before i cleaned it up
 - Robot: the code that will be deploied
-# ToDo
-- offset for camera to robot centre
-- offset to grabber
-- get camera library working
-- get positional mapping working
-- build grabber
-- build tin can lifting arm
-- code to use grabber
-- calibrate as distance is to centre of marker
-- debug display
-- battery enclosure
-- flag mount
-- cable management
-- cut down mounting bolts
-- notch mounting plate
-- mark motor letters
-- create spare part assemblies
-- start switch
-- hardcoded movement instructions
+# TODO
+- Offset for camera to robot centre
+- Offset to grabber
+- Get camera library working
+- Get positional mapping working with distance tracking
+- Build can grabber
+- Build lifting arm
+- Code to use grabber
+- Calibrate as distance is to centre of marker
+- Debug display
+- Battery enclosure
+- Flag mount
+- Cable management
+- Cut down mounting bolts
+- Notch mounting plates
+- Mark motor letters
+- Create spare part assemblies
+- Start switch/ button
+- Hardcoded movement instructions
+- Create return to home function
+- Motor hubs/ grub screws
+- Make USB's accessable for COMP mode + code USB stick
+- Improve looks of robot
+- Give robot a name
+- Add GDC Branding
