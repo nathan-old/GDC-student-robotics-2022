@@ -125,12 +125,12 @@ class MotorMaster():
                  motor_boards=['SR0PJ1W', 'SR0VG1M']):
         self.robot = robot
         self.wheel_circumference = wheel_circumference
-        self.wheel_one = self.robot.motor_boards[motor_boards[0]].motors[0]
-        self.wheel_two = self.robot.motor_boards[motor_boards[0]].motors[1]
-        self.wheel_three = self.robot.motor_boards[motor_boards[1]].motors[0]
+        self.wheel_A = self.robot.motor_boards[motor_boards[0]].motors[0]
+        self.wheel_B = self.robot.motor_boards[motor_boards[0]].motors[1]
+        self.wheel_B = self.robot.motor_boards[motor_boards[1]].motors[0]
         self.arm_radius = arm_radius
         self.wrap_angles = wrap_angles
-        self.wheels = [self.wheel_one, self.wheel_two, self.wheel_three]
+        self.wheels = [self.wheel_A, self.wheel_B, self.wheel_C]
         # brake by default
         for wheel in self.wheels:
             wheel.power = 0
