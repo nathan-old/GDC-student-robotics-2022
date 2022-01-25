@@ -40,6 +40,8 @@ The diffrent status codes:
 - Offset for camera to robot centre
 - Offset to grabber
 - Get camera library working
+- Create mapping
+- Include can locations
 - Get positional mapping working with distance tracking
 - Build can grabber
 - Build lifting arm
@@ -51,7 +53,6 @@ The diffrent status codes:
 - Cable management
 - Cut down mounting bolts
 - Notch mounting plates
-- Mark motor letters
 - Create spare part assemblies
 - Start switch/ button
 - Hardcoded movement instructions
@@ -62,3 +63,5 @@ The diffrent status codes:
 - Give robot a name
 - Add GDC Branding
 - RPM for different powers
+- ~~Mark motor letters~~
+- ~~Maths for positional data~~
