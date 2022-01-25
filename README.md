@@ -61,3 +61,4 @@ The diffrent status codes:
 - Improve looks of robot
 - Give robot a name
 - Add GDC Branding
+- RPM for different powers

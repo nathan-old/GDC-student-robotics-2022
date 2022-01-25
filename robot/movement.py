@@ -119,8 +119,8 @@ class MotorMaster():
 
     def __init__(self,
                  robot,
-                 wheel_circumference=0.15,
-                 arm_radius=0.18,
+                 wheel_circumference=0.3299,
+                 arm_radius=0.28,
                  wrap_angles=False,
                  motor_boards=['SR0PJ1W', 'SR0VG1M']):
         self.robot = robot
@@ -148,13 +148,14 @@ class MotorMaster():
         # if our distance is negative, invert it and the power
         power = 1 if distance > 0 else 0
         distance = distance if distance > 0 else distance * -1
-
+        
         rps = rpm / 60
         speed = self.wheel_circumference * rps  # in m/s
         time_ = float(distance / speed)  # in secconds
         return time_, power
 
-    def _move(self, distance, rpm=140):
+    def _move(self, x_distance, rpm=140):
+        distance = x_distance/math.cos(math.radins(30))
         time_, power = self.__calculate_move(distance, rpm)
         print("Moving " + str(distance) + " meters, " + str(time_) +
               " seconds, at " + str(rpm) + " rpm, with power " + str(power))
