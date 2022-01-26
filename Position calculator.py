@@ -1,7 +1,4 @@
-from math import sin
-from math import cos
-from math import tan
-from math import pi
+from math import *
 
 # calculates the distance of the marker from the robot
 def calculate_distance(theta,psi,r):
