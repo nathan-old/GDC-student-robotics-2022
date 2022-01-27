@@ -47,7 +47,7 @@ def get_markers():
 	'''
 	markers_input = R.camera.see()
 	for i in range(len(markers_input)):
-		markers.append([degrees(markers_input[i][6][1]),degrees(markers_input[i][6][0]),markers_input[i][6][2],markers_input[i][0]])
+		markers.append([degrees(markers_input[i][6][1]),degrees(markers_input[i][6][0]),markers_input[i][6][2]*1000,markers_input[i][0]])
 	if len(markers) == 0:
 		print('No markers, trying again in 5 s')
 		time.sleep(5)
