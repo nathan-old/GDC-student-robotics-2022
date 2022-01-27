@@ -45,9 +45,10 @@ def get_markers():
 	inputs from robot camera in degrees and mm
 	list of markers seen by camera, in order theta, psi, r, marker number
 	'''
+	markers = []
 	markers_input = R.camera.see()
-	for i in range(len(markers_input)):
-		markers.append([degrees(markers_input[i][6][1]),degrees(markers_input[i][6][0]),markers_input[i][6][2]*1000,markers_input[i][0]])
+	for marker in markers_input:
+		markers.append([degrees(marker.spherical.rot_x),degrees(marker.spherical.rot_y),marker.spherical.dist*1000,marker.id])
 	if len(markers) == 0:
 		print('No markers, trying again in 5 s')
 		time.sleep(5)
@@ -82,4 +83,7 @@ for file_num in range(10):
 	#plt.show()
 
 	plt.savefig(fname = 'figure'+str(file_num)+'.png', dpi = 200)
-	time.sleep(2)
+	R.power_board.piezo.buzz(0.2, 400)
+	time.sleep(0.1)
+	R.power_board.piezo.buzz(0.2, 400)
+	time.sleep(5)

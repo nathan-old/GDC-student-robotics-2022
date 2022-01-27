@@ -12,8 +12,8 @@ class Config():
         self.wheel_count = 3  # number of wheels on the robot
         self.turn_wheel_index = 0  # the index of the wheel that is used for turning
 
-        self.wheel_circumference = 0.15  # the circumference of the wheels in meters
-        self.arm_radius = 0.18  # the radius of the arm in meters
+        self.wheel_circumference = 0.3299  # the circumference of the wheels in meters
+        self.arm_radius = 0.28  # the radius of the arm in meters
         self.wrap_angles = False  # if true, the angle will be wrapped to be between -180 and 180
         self.min_time_between_buzzes = 0.1  # the minimum time between buzzes in seconds
 
