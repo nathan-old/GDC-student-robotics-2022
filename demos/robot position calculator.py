@@ -1,5 +1,4 @@
 from math import *
-import matplotlib.pyplot as plt
 from sr.robot3 import *
 import time
 
@@ -50,8 +49,8 @@ def get_markers():
 	for marker in markers_input:
 		markers.append([degrees(marker.spherical.rot_x),degrees(marker.spherical.rot_y),marker.spherical.dist*1000,marker.id])
 	if len(markers) == 0:
-		print('No markers, trying again in 5 s')
-		time.sleep(5)
+		print('No markers, trying again in 1 s')
+		time.sleep(1)
 		return get_markers()
 	return markers
 
@@ -61,29 +60,13 @@ marker_list = [[0,718.75,5750],[1,1437.5,5750],[2,2156.25,5750],[3,2875,5750],[4
 
 R.wait_start()#start command
 
-for file_num in range(10):
-	markers = get_markers()
-
-	x = []
-	y = []
-	for i in range(len(marker_list)):
-		x.append(marker_list[i][1])
-		y.append(marker_list[i][2])
-	plt.scatter(x,y, linewidths = 5)
-
-	for i in range(len(x)):
-		#plt.annotate('hi', 5000, 500)
-		plt.text(x[i], y[i], str(i), horizontalalignment='center', verticalalignment='center', fontsize = 6)
-
-
-	for i in markers:
-		point = calculate_distance(i[0],i[1],i[2], i[3])
-		plt.scatter(point[0],point[1])
-
-	#plt.show()
-
-	plt.savefig(fname = 'figure'+str(file_num)+'.png', dpi = 200)
-	R.power_board.piezo.buzz(0.2, 400)
-	time.sleep(0.1)
-	R.power_board.piezo.buzz(0.2, 400)
-	time.sleep(5)
+for i in range(6):
+        print(get_markers())
+        R.power_board.piezo.buzz(0.2, 500)
+        time.sleep(3)
+R.power_board.piezo.buzz(0.2, 350)
+time.sleep(0.2)
+R.power_board.piezo.buzz(0.2, 350)
+time.sleep(0.2)
+R.power_board.piezo.buzz(0.2, 350)
+time.sleep(0.2)
