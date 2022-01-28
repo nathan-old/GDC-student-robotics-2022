@@ -20,7 +20,7 @@ After powering on the robot, wait for either of the preboot audio status codes d
 
 # Debuging using buzzers
 Please note, that without `VERBOSE_AUDIO = True` many of these will not play. 
-The diffrent status codes:
+The different status codes:
 - `C6 for 0.25, C6 for 0.2, silence for 0.25, C7 for 1`: Preboot, compition mode (you are probably doing something wrong unless you REALLY are in comp mode)
 - `C6 for 0.25, C6 for 0.2, silence for 0.25, C6 for 1`: Preboot, dev mode (normal)
 - `C6 for 0.5, silence for 0.25, C6 for 0.5, silence for 0.25 C6 for 0.5`: Robot hardware online successfully 
