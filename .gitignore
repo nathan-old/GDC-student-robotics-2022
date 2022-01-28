@@ -174,3 +174,7 @@ dmypy.json
  
 # Cython debug symbols
 cython_debug/
+
+# video
+**.avi
+**.mp4
