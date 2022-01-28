@@ -94,18 +94,6 @@ class AsyncPlotter():
             p.join()
 
 
-# calculates the distance of the marker from the robot
-def calculate_distance(theta, psi, r):
-    h = (r * math.cos(math.radians(90 - theta)))
-    z = (r * math.cos(math.radians(theta)))
-    x = (h * math.cos(math.radians(90 - psi)))
-    y = (h * math.sin(math.radians(90 - psi)))
-    print("x:", x, end=', ')
-    print("y:", y, end=', ')
-    print("z:", z)
-    return (x, y)
-
-
 # calculates the position of the robot using the position of the marker
 def calculate_pos(x_in, y_in, marker_number):
     robot_pos = []
@@ -129,6 +117,26 @@ def calculate_pos(x_in, y_in, marker_number):
         y = marker_pos[1] + y_in
         robot_pos = [x, y]
     return (robot_pos)
+
+
+def get_intersections(x0, y0, r0, x1, y1, r1):
+    d = math.sqrt((x1 - x0)**2 + (y1 - y0)**2)
+    if d > r0 + r1:
+        return [[-1, -1], [-1, -1]]
+    if d < abs(r0 - r1):
+        return [[-2, -2], [-2, -2]]
+    if d == 0 and r0 == r1:
+        return [[-3, -3], [-3, -3]]
+    else:
+        a = (r0**2 - r1**2 + d**2) / (2 * d)
+        h = math.sqrt(r0**2 - a**2)
+        x2 = x0 + a * (x1 - x0) / d
+        y2 = y0 + a * (y1 - y0) / d
+        x3 = x2 + h * (y1 - y0) / d
+        y3 = y2 - h * (x1 - x0) / d
+        x4 = x2 - h * (y1 - y0) / d
+        y4 = y2 + h * (x1 - x0) / d
+        return ([[x3, y3], [x4, y4]])
 
 
 # inputs from robot camera in degrees and mm
@@ -175,7 +183,6 @@ class Robot():
     def calc_move(self):
         if len(self.future_movement) == 0:
             return
-        print(self.future_movement)
         # get the first elemtn of self.future_movement and then remove it
         movement = self.future_movement.pop(0)
         self.rotation += movement[1]
@@ -184,8 +191,6 @@ class Robot():
             math.radians(self.rotation))
         next_y = self.real_position[1] + movement[0] * math.sin(
             math.radians(self.rotation))
-
-        print(next_x, next_y)
 
         self.real_position[0] = next_x  #min(max(next_x, 0), 5740)
         self.real_position[1] = next_y  #min(max(next_y, 0), 5740)
@@ -206,18 +211,56 @@ class Robot():
 
     def calculate_seen_values(self):
         # TODO: emulate the values we would get from the sr3 camera libary regarding each marker
-        points = [
-        ]  # [[85, 90, 1500, 11], [90, 90, 800, 8], [90, 90, 5750 / 2, 24], [90, 90, 5750 / 2, 17], [90, 90, 1000, 23], [90, 90 - 35.678, 1231.1, 22], [90, 90 + 35.678, 1231.1, 24]]
+        points = []  #[[90, 90 - 35.678, 1231.1, 8],
+        #            [90, 90, 1000, 9],
+        #            [90, 90 + 35.678, 1231.1, 10]]
+        for id in self.seen_ids:
+            points.append([
+                90,
+                self.angle_to_point(marker_list[id][1], marker_list[id][2]),
+                self.distance_to_point(marker_list[id][1], marker_list[id][2]),
+                id
+            ])
+
+        self.seen_vals = points
+
         return points
 
     def process_seen_markers(self):
+        if len(self.seen_markers) == 0:
+            return
         #process each seen marker and output a point on the map it suggests the location of the camera is
+        circles = []
         for marker in self.seen_markers:
-            (x, y) = calculate_distance(marker[0], marker[1], marker[2])
-            point = calculate_pos(x, y, marker[3])
-            point.append(marker[3])
-            self.calculated_points.append(point)
-        # TODO: calc standard deviation and remove outliers
+            point = (marker[2] * math.cos(math.radians(90 - marker[0])))
+            circles.append([marker[1], marker[2], point, marker[3]])
+            plt.gca().add_patch(
+                patches.Circle((marker[1], marker[2]),
+                               point,
+                               fill=False,
+                               linestyle=':',
+                               color='C1'))
+
+        valid_points = [[], []]
+        for i in range(len(circles)):
+            if i + 1 != len(circles):
+                a = i + 1
+            else:
+                a = 0
+            points = get_intersections(circles[i][0], circles[i][1],
+                                       circles[i][2], circles[a][0],
+                                       circles[a][1], circles[a][2])
+            for point in points:
+                if 0 < point[0] < 5750 and 0 < point[1] < 5750:
+                    valid_points[0].append(point[0])
+                    valid_points[1].append(point[1])
+                    self.calculated_points.append(
+                        [point[0], point[1], circles[i][3]])
+        if len(valid_points[0]) == 0:
+            return
+        avg_x = sum(valid_points[0]) / len(valid_points[0])
+        avg_y = sum(valid_points[1]) / len(valid_points[1])
+        self.calculated_pos = [avg_x, avg_y]
 
     def calc_fov_points(self):
         x = self.real_position[0]
@@ -264,10 +307,12 @@ class Robot():
                  fontsize=5,
                  color='w')
 
-        direction_x = self.real_position[0] + self.camera_distance * math.cos(
-            math.radians(self.rotation))
-        direction_y = self.real_position[1] + self.camera_distance * math.sin(
-            math.radians(self.rotation))
+        direction_x = self.real_position[
+            0] + self.camera_distance / 2 * math.cos(
+                math.radians(self.rotation))
+        direction_y = self.real_position[
+            1] + self.camera_distance / 2 * math.sin(
+                math.radians(self.rotation))
         plt.plot([self.real_position[0], direction_x],
                  [self.real_position[1], direction_y],
                  color='C1')
@@ -338,13 +383,47 @@ class Robot():
             #                      color='b'))
 
             for i in range(len(x)):
-                plt.text(x[i],
-                         y[i],
-                         str(i),
-                         horizontalalignment='center',
-                         verticalalignment='center',
-                         fontsize=5,
-                         color='w')
+                if i < 7:
+                    plt.text(x[i],
+                             y[i] - 40,
+                             str(i),
+                             horizontalalignment='center',
+                             verticalalignment='center',
+                             fontsize=5,
+                             color='w')
+                elif 6 < i < 14:
+                    plt.text(x[i] - 60,
+                             y[i],
+                             str(i),
+                             horizontalalignment='center',
+                             verticalalignment='center',
+                             fontsize=5,
+                             color='w')
+                elif 13 < i < 21:
+                    plt.text(x[i],
+                             y[i] + 40,
+                             str(i),
+                             horizontalalignment='center',
+                             verticalalignment='center',
+                             fontsize=5,
+                             color='w')
+                elif 20 < i < 28:
+                    plt.text(x[i] + 60,
+                             y[i],
+                             str(i),
+                             horizontalalignment='center',
+                             verticalalignment='center',
+                             fontsize=5,
+                             color='w')
+                else:
+                    plt.text(x[i],
+                             y[i],
+                             str(i),
+                             horizontalalignment='center',
+                             verticalalignment='center',
+                             fontsize=5,
+                             color='w')
+
             plt.axis("off")
         else:
             # load the precreated background.png
@@ -353,6 +432,16 @@ class Robot():
             ax.imshow(img, extent=[0, 5750, 0, 5750], aspect='auto', zorder=0)
 
         return fig
+
+    def angle_to_point(self, x, y):
+        dx = x - self.real_position[0]
+        dy = y - self.real_position[1]
+        return math.degrees(math.atan2(dy, dx))
+
+    def distance_to_point(self, x, y):
+        dx = x - self.real_position[0]
+        dy = y - self.real_position[1]
+        return math.sqrt(dx**2 + dy**2)
 
     def render_frame(self):
 
@@ -366,7 +455,7 @@ class Robot():
             ax = plt.gca()
             ax.set_xlim([0, 6000])
             ax.set_ylim([0, 6000])
-            self.render_points()
+            #self.render_points()
             self.render_position()
             plt.plot([self.real_position[0], self.fov_points[0][0]],
                      [self.real_position[1], self.fov_points[1][0]],
@@ -374,6 +463,9 @@ class Robot():
             plt.plot([self.real_position[0], self.fov_points[0][1]],
                      [self.real_position[1], self.fov_points[1][1]],
                      color='C5')
+            plt.scatter(self.calculated_pos[0],
+                        self.calculated_pos[1],
+                        color='C3')  # location
             x = []
             y = []
 
@@ -382,6 +474,16 @@ class Robot():
                     x.append(marker_list[i][1])
                     y.append(marker_list[i][2])
             plt.scatter(x, y, color='green')
+
+            for point in self.seen_vals:
+                # draw a line from the robot at angle and distance
+                direction_x = self.real_position[0] + point[2] * math.cos(
+                    math.radians(point[1]))
+                direction_y = self.real_position[0] + point[2] * math.sin(
+                    math.radians(point[1]))
+                plt.plot([self.real_position[0], direction_x],
+                         [self.real_position[1], direction_y],
+                         color='blue')
 
         plot_end = time.time()
         print(f"{self.frame}/{self.max_frame}: {round(plot_end-start, 3)}")
