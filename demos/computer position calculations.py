@@ -87,7 +87,16 @@ for i in range(len(marker_list)):
 	y.append(marker_list[i][2])
 plt.scatter(x,y,color='b')
 for i in range(len(x)):
-	plt.text(x[i], y[i], str(i), horizontalalignment='center', verticalalignment='center', fontsize = 5, color='w')
+	if i<7:
+		plt.text(x[i], y[i]-40, str(i), horizontalalignment='center', verticalalignment='center', fontsize = 5, color='w')
+	elif 6<i<14:
+		plt.text(x[i]-60, y[i], str(i), horizontalalignment='center', verticalalignment='center', fontsize = 5, color='w')
+	elif 13<i<21:
+		plt.text(x[i], y[i]+40, str(i), horizontalalignment='center', verticalalignment='center', fontsize = 5, color='w')
+	elif 20<i<28:
+		plt.text(x[i]+60, y[i], str(i), horizontalalignment='center', verticalalignment='center', fontsize = 5, color='w')
+	else:
+		plt.text(x[i], y[i], str(i), horizontalalignment='center', verticalalignment='center', fontsize = 5, color='w')
 
 circles = []
 for i in seen_markers:
@@ -110,6 +119,6 @@ for i in range(len(circles)):
 avg_x = sum(valid_points[0]) / len(valid_points[0])
 avg_y = sum(valid_points[1]) / len(valid_points[1])
 plt.scatter(avg_x,avg_y, color = 'C3')# location
-
+plt.axis("off")
 
 plt.savefig(fname = 'figure.png', dpi = 300, transparent = True)
