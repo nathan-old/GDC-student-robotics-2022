@@ -114,10 +114,7 @@ class RemoteController(RobotModule):
                 s_state = True
             else:
                 s_state = False
-            if b_value > 1500:
-                b_state = True
-            else:
-                b_state = False
+            
 
             x_value = range_map(x_value, x_max, x_min, [-1, 1])
             y_value = range_map(y_value, y_max, y_min, [-1, 1])
