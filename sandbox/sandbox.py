@@ -2,6 +2,7 @@
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 import multiprocessing as mp
+mp.set_start_method("fork")
 import time, matplotlib
 import cv2, math, numpy as np
 
@@ -33,7 +34,7 @@ marker_list = [[0, 718.75, 5750], [1, 1437.5, 5750], [2, 2156.25, 5750],
 MAX_SPEED = 500  # Max speed (mm/s)
 ROT_SPEED = 90  # degrees / s
 FPS = 4
-DURATION = 15  # secconds
+DURATION = 10  # secconds
 
 
 # A function to check whether point P(x, y)
@@ -275,15 +276,15 @@ class Robot():
         #    factor = 360
         #print(rot, factor)
         for marker in self.seen_markers:
-            print(marker[3], marker[1])
-            point = (marker[2] * math.cos(math.radians(factor - 90)))
-            circles.append([marker[1], marker[2], point, marker[3]])
+            #print(marker[3], marker[1])
+            point = (marker[2] * math.cos(math.radians(factor - marker[1][0])))
+            circles.append([marker[1][0], marker[2], point, marker[3]])
             plt.gca().add_patch(
-                patches.Circle((marker[1], marker[2]),
+                patches.Circle((marker[1][0], marker[2]),
                                point,
                                fill=False,
                                linestyle=':',
-                               color='C1'))
+                               color='C3'))
 
         valid_points = [[], []]
         for i in range(len(circles)):
@@ -506,7 +507,6 @@ class Robot():
         robot_angle = 360 - robot_angle
         if robot_angle == 360:
             robot_angle = 0
-        print("Leo: {}, Tobys: {}".format(self.rotation, robot_angle))
         marker_angle = None
         if dx > 0 and dy > 0:
             dx = abs(dx)
@@ -539,9 +539,10 @@ class Robot():
 
         if marker_angle == 0 and robot_angle > 180:
             marker_angle = 360
-        phi = (-1 * (marker_angle - robot_angle)) + 90
+        phi = (-1 * (marker_angle - robot_angle)) 
+        print("{}:{}".format(robot_angle, marker_angle))
 
-        return phi
+        return [phi, marker_angle -  robot_angle]
 
     def distance_to_point(self, x, y):
         dx = x - self.real_position[0]
@@ -579,13 +580,15 @@ class Robot():
                     x.append(marker_list[i][1])
                     y.append(marker_list[i][2])
             plt.scatter(x, y, color='green')
-
             for point in self.seen_vals:
+                s = self.rotation + (-1 * point[1][1])
+                if s > 360:
+                    s -= 360
                 # draw a line from the robot at angle and distance
                 direction_x = self.real_position[0] + point[2] * math.cos(
-                    math.radians(point[1]))
+                    math.radians(s))
                 direction_y = self.real_position[0] + point[2] * math.sin(
-                    math.radians(point[1]))
+                    math.radians(s))
                 plt.plot([self.real_position[0], direction_x],
                          [self.real_position[1], direction_y],
                          color='blue')
