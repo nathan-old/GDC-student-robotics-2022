@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 import multiprocessing as mp
 import time, matplotlib
-import cv2, glob, math
+import cv2, math, numpy as np
 
 matplotlib.use('Agg')
 
@@ -59,6 +59,36 @@ def isInside(x1, y1, x2, y2, x3, y3, x, y):
         return True
     else:
         return False
+
+
+def point_in_triangle(point, triangle):
+    """Returns True if the point is inside the triangle
+    and returns False if it falls outside.
+    - The argument *point* is a tuple with two elements
+    containing the X,Y coordinates respectively.
+    - The argument *triangle* is a tuple with three elements each
+    element consisting of a tuple of X,Y coordinates.
+
+    It works like this:
+    Walk clockwise or counterclockwise around the triangle
+    and project the point onto the segment we are crossing
+    by using the dot product.
+    Finally, check that the vector created is on the same side
+    for each of the triangle's segments.
+    """
+    # Unpack arguments
+    x, y = point
+    ax, ay = triangle[0]
+    bx, by = triangle[1]
+    cx, cy = triangle[2]
+    # Segment A to B
+    side_1 = (x - bx) * (ay - by) - (ax - bx) * (y - by)
+    # Segment B to C
+    side_2 = (x - cx) * (by - cy) - (bx - cx) * (y - cy)
+    # Segment C to A
+    side_3 = (x - ax) * (cy - ay) - (cx - ax) * (y - ay)
+    # All the signs must be positive or all negative
+    return (side_1 < 0.0) == (side_2 < 0.0) == (side_3 < 0.0)
 
 
 # Credit: https://gist.github.com/astrofrog/1453933
@@ -150,12 +180,12 @@ seen_markers_ = [[85, 90, 1500, 11], [90, 90, 800, 8], [90, 90, 5750 / 2, 24],
 
 class Robot():
 
-    def __init__(self, max_frame=5, camera_fov=60, camera_distance=3000):
+    def __init__(self, max_frame=5, camera_fov=60, camera_distance=4000):
         self.seen_ids = []
         self.seen_markers = []
         self.camera_fov = camera_fov
         self.camera_distance = camera_distance  # mm
-        self.real_position = [2000, 2000]
+        self.real_position = [5750 / 2, 5750 / 2]
         self.calculated_pos = [0, 0]
         self.frame = 0
         self.max_frame = max_frame
@@ -202,15 +232,16 @@ class Robot():
             id = marker[0]
             x = marker[1]
             y = marker[2]
-            if isInside(self.real_position[0], self.real_position[1],
-                        self.fov_points[0][0], self.fov_points[1][0],
-                        self.fov_points[0][1], self.fov_points[1][1], x, y):
+            if point_in_triangle(
+                (x, y), ((self.fov_points[0][0], self.fov_points[1][0]),
+                         (self.real_position[0], self.real_position[1]),
+                         (self.fov_points[0][1], self.fov_points[1][1]))):
                 self.seen_ids.append(id)
 
         self.seen_markers = self.calculate_seen_values()
 
     def calculate_seen_values(self):
-        # TODO: emulate the values we would get from the sr3 camera libary regarding each marker
+        # The values retruned from the "camera" in order theta, psi, r(distance), marker number
         points = []  #[[90, 90 - 35.678, 1231.1, 8],
         #            [90, 90, 1000, 9],
         #            [90, 90 + 35.678, 1231.1, 10]]
@@ -227,12 +258,25 @@ class Robot():
         return points
 
     def process_seen_markers(self):
+        self.calculated_points = []
         if len(self.seen_markers) == 0:
             return
         #process each seen marker and output a point on the map it suggests the location of the camera is
         circles = []
+        rot = self.rotation
+        factor = 180
+        #if rot >= 0 and rot <= 90:
+        #    factor  = 90
+        #elif rot >= 90 and rot <= 180:
+        #    factor = 180
+        #elif rot >= 180 and rot <= 270:
+        #    factor = 270
+        #else:
+        #    factor = 360
+        #print(rot, factor)
         for marker in self.seen_markers:
-            point = (marker[2] * math.cos(math.radians(90 - marker[0])))
+            print(marker[3], marker[1])
+            point = (marker[2] * math.cos(math.radians(factor - 90)))
             circles.append([marker[1], marker[2], point, marker[3]])
             plt.gca().add_patch(
                 patches.Circle((marker[1], marker[2]),
@@ -261,6 +305,11 @@ class Robot():
         avg_x = sum(valid_points[0]) / len(valid_points[0])
         avg_y = sum(valid_points[1]) / len(valid_points[1])
         self.calculated_pos = [avg_x, avg_y]
+        # print the percentage diffrence between the real position and the calculated position
+
+        print("x: {}% y: {}%".format(
+            100 * (self.real_position[0] - avg_x) / self.real_position[0],
+            100 * (self.real_position[1] - avg_y) / self.real_position[1]))
 
     def calc_fov_points(self):
         x = self.real_position[0]
@@ -316,6 +365,19 @@ class Robot():
         plt.plot([self.real_position[0], direction_x],
                  [self.real_position[1], direction_y],
                  color='C1')
+
+        # line going right from the robot
+        plt.plot([
+            self.real_position[0],
+            self.real_position[0] + self.camera_distance / 2 *
+            math.cos(math.radians(self.rotation - 90))
+        ], [
+            self.real_position[1],
+            self.real_position[1] + self.camera_distance / 2 *
+            math.sin(math.radians(self.rotation - 90))
+        ],
+                 color='C1',
+                 linestyle='--')
 
     def render_points(self):
         for point in self.calculated_points:
@@ -434,9 +496,52 @@ class Robot():
         return fig
 
     def angle_to_point(self, x, y):
+        robot_angle = self.rotation
         dx = x - self.real_position[0]
         dy = y - self.real_position[1]
-        return math.degrees(math.atan2(dy, dx))
+
+        robot_angle -= 90
+        if robot_angle < 0:
+            robot_angle += 360
+        robot_angle = 360 - robot_angle
+        if robot_angle == 360:
+            robot_angle = 0
+        print("Leo: {}, Tobys: {}".format(self.rotation, robot_angle))
+        marker_angle = None
+        if dx > 0 and dy > 0:
+            dx = abs(dx)
+            dy = abs(dy)
+            marker_angle = math.degrees(math.atan(dy / dx))
+            marker_angle = 90 - marker_angle
+        elif dx > 0 and dy < 0:
+            dx = abs(dx)
+            dy = abs(dy)
+            marker_angle = math.degrees(math.atan(dy / dx))
+            marker_angle = 90 + marker_angle
+        elif dx < 0 and dy > 0:
+            dx = abs(dx)
+            dy = abs(dy)
+            marker_angle = math.degrees(math.atan(dy / dx))
+            marker_angle = 270 - marker_angle
+        elif dx < 0 and dy < 0:
+            dx = abs(dx)
+            dy = abs(dy)
+            marker_angle = math.degrees(math.atan(dy / dx))
+            marker_angle = 270 + marker_angle
+        elif dx == 0 and dy > 0:
+            marker_angle = 0
+        elif dx == 0 and dy < 0:
+            marker_angle = 270
+        elif dy == 0 and dx > 0:
+            marker_angle = 90
+        elif dy == 0 and dx < 0:
+            marker_angle = 180
+
+        if marker_angle == 0 and robot_angle > 180:
+            marker_angle = 360
+        phi = (-1 * (marker_angle - robot_angle)) + 90
+
+        return phi
 
     def distance_to_point(self, x, y):
         dx = x - self.real_position[0]
@@ -455,7 +560,7 @@ class Robot():
             ax = plt.gca()
             ax.set_xlim([0, 6000])
             ax.set_ylim([0, 6000])
-            #self.render_points()
+            self.render_points()
             self.render_position()
             plt.plot([self.real_position[0], self.fov_points[0][0]],
                      [self.real_position[1], self.fov_points[1][0]],
