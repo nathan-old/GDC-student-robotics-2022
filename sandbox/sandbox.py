@@ -36,32 +36,6 @@ ROT_SPEED = 90  # degrees / s
 FPS = 4
 DURATION = 10  # secconds
 
-
-# A function to check whether point P(x, y)
-# lies inside the triangle formed by
-# A(x1, y1), B(x2, y2) and C(x3, y3)
-# Credit: https://www.geeksforgeeks.org/check-whether-a-given-point-lies-inside-a-triangle-or-not/
-def isInside(x1, y1, x2, y2, x3, y3, x, y):
-
-    def area(x1, y1, x2, y2, x3, y3):
-        return abs((x1 * (y2 - y3) + x2 * (y3 - y1) + x3 * (y1 - y2)) / 2.0)
-
-    # Calculate area of triangle ABC
-    A = area(x1, y1, x2, y2, x3, y3)
-    # Calculate area of triangle PBC
-    A1 = area(x, y, x2, y2, x3, y3)
-    # Calculate area of triangle PAC
-    A2 = area(x1, y1, x, y, x3, y3)
-    # Calculate area of triangle PAB
-    A3 = area(x1, y1, x2, y2, x, y)
-    # Check if sum of A1, A2 and A3
-    # is same as A
-    if (A == A1 + A2 + A3):
-        return True
-    else:
-        return False
-
-
 def point_in_triangle(point, triangle):
     """Returns True if the point is inside the triangle
     and returns False if it falls outside.
@@ -168,25 +142,20 @@ def get_intersections(x0, y0, r0, x1, y1, r1):
         x4 = x2 - h * (y1 - y0) / d
         y4 = y2 + h * (x1 - x0) / d
         return ([[x3, y3], [x4, y4]])
+    
 
 
 # inputs from robot camera in degrees and mm
 # list of markers seen by camera, in order theta, psi, r, marker number
-seen_markers_ = [[85, 90, 1500, 11], [90, 90, 800, 8], [90, 90, 5750 / 2, 24],
-                 [90, 90, 5750 / 2, 17], [90, 90, 1000, 23],
-                 [90, 90 - 35.678, 1231.1, 22], [90, 90 + 35.678, 1231.1, 24]]
-
-#seen_markers.append([-2.415157355926346, -11.116173340480376, 2086000, 0])
-
 
 class Robot():
 
-    def __init__(self, max_frame=5, camera_fov=60, camera_distance=4000):
+    def __init__(self, max_frame=100, camera_fov=62, camera_distance=4000):
         self.seen_ids = []
         self.seen_markers = []
         self.camera_fov = camera_fov
         self.camera_distance = camera_distance  # mm
-        self.real_position = [5750 / 2, 5750 / 2]
+        self.real_position = [200, 200]
         self.calculated_pos = [0, 0]
         self.frame = 0
         self.max_frame = max_frame
@@ -194,7 +163,7 @@ class Robot():
         self.save_threads = []
         self.future_movement = []
         self.async_plotter = AsyncPlotter()
-        self.rotation = 5
+        self.rotation = 0
         self.fov_points = []
 
     def move(self, amount, rot=0):
@@ -223,8 +192,8 @@ class Robot():
         next_y = self.real_position[1] + movement[0] * math.sin(
             math.radians(self.rotation))
 
-        self.real_position[0] = next_x  #min(max(next_x, 0), 5740)
-        self.real_position[1] = next_y  #min(max(next_y, 0), 5740)
+        self.real_position[0] = min(max(next_x, 0), 5740)
+        self.real_position[1] = min(max(next_y, 0), 5740)
 
     def calculate_seen(self):
         # TODO: emulate fov, figure out what markers we can see and pass this to calculate_seen_values
@@ -265,7 +234,7 @@ class Robot():
         #process each seen marker and output a point on the map it suggests the location of the camera is
         circles = []
         rot = self.rotation
-        factor = 180
+        factor = 90
         #if rot >= 0 and rot <= 90:
         #    factor  = 90
         #elif rot >= 90 and rot <= 180:
@@ -277,10 +246,10 @@ class Robot():
         #print(rot, factor)
         for marker in self.seen_markers:
             #print(marker[3], marker[1])
-            point = (marker[2] * math.cos(math.radians(factor - marker[1][0])))
-            circles.append([marker[1][0], marker[2], point, marker[3]])
+            point = (marker[2] * math.cos(math.radians(factor - 90)))
+            circles.append([marker[1], marker[2], point, marker[3]])
             plt.gca().add_patch(
-                patches.Circle((marker[1][0], marker[2]),
+                patches.Circle((marker[1], marker[2]),
                                point,
                                fill=False,
                                linestyle=':',
@@ -292,9 +261,15 @@ class Robot():
                 a = i + 1
             else:
                 a = 0
-            points = get_intersections(circles[i][0], circles[i][1],
-                                       circles[i][2], circles[a][0],
-                                       circles[a][1], circles[a][2])
+            circle_one = circles[i]
+            circle_two = circles[a]
+            marker_one = [marker_list[circle_one[3]][1], marker_list[circle_one[3]][2]]
+            marker_two = [marker_list[circle_two[3]][1], marker_list[circle_two[3]][2]]
+
+            # circle (0: psi, 1: dist, 2: point, 3: marker id)
+            points = get_intersections(marker_one[0], marker_one[1],
+                                       circle_one[1], marker_two[0],
+                                       marker_two[1], circle_two[1])
             for point in points:
                 if 0 < point[0] < 5750 and 0 < point[1] < 5750:
                     valid_points[0].append(point[0])
@@ -309,8 +284,9 @@ class Robot():
         # print the percentage diffrence between the real position and the calculated position
 
         print("x: {}% y: {}%".format(
-            100 * (self.real_position[0] - avg_x) / self.real_position[0],
-            100 * (self.real_position[1] - avg_y) / self.real_position[1]))
+            round(100 * (self.real_position[0] - avg_x) / self.real_position[0],1),
+            round(100 * (self.real_position[1] - avg_y) / self.real_position[1], 1)
+        ))
 
     def calc_fov_points(self):
         x = self.real_position[0]
@@ -349,13 +325,13 @@ class Robot():
     def render_position(self):
         plt.scatter(self.real_position[0], self.real_position[1], color='C2')
 
-        plt.text(self.real_position[0],
-                 self.real_position[1],
-                 str(self.frame),
-                 horizontalalignment='center',
-                 verticalalignment='center',
-                 fontsize=5,
-                 color='w')
+        #plt.text(self.real_position[0],
+        #          self.real_position[1],
+        #          str(self.frame),
+        #          horizontalalignment='center',
+        #          verticalalignment='center',
+        #          fontsize=5,
+        #          color='w')
 
         direction_x = self.real_position[
             0] + self.camera_distance / 2 * math.cos(
@@ -366,19 +342,6 @@ class Robot():
         plt.plot([self.real_position[0], direction_x],
                  [self.real_position[1], direction_y],
                  color='C1')
-
-        # line going right from the robot
-        plt.plot([
-            self.real_position[0],
-            self.real_position[0] + self.camera_distance / 2 *
-            math.cos(math.radians(self.rotation - 90))
-        ], [
-            self.real_position[1],
-            self.real_position[1] + self.camera_distance / 2 *
-            math.sin(math.radians(self.rotation - 90))
-        ],
-                 color='C1',
-                 linestyle='--')
 
     def render_points(self):
         for point in self.calculated_points:
@@ -398,6 +361,7 @@ class Robot():
 
     def process_background(self):
         fig = plt.figure()
+        #fig.max_open_warning = 
         if self.frame == 0:
             plt.xlim(0, 5750)
             plt.ylim(0, 5750)
@@ -500,6 +464,7 @@ class Robot():
         robot_angle = self.rotation
         dx = x - self.real_position[0]
         dy = y - self.real_position[1]
+        marker_angle = math.degrees(math.atan2(dx,dy))
 
         robot_angle -= 90
         if robot_angle < 0:
@@ -507,42 +472,14 @@ class Robot():
         robot_angle = 360 - robot_angle
         if robot_angle == 360:
             robot_angle = 0
-        marker_angle = None
-        if dx > 0 and dy > 0:
-            dx = abs(dx)
-            dy = abs(dy)
-            marker_angle = math.degrees(math.atan(dy / dx))
-            marker_angle = 90 - marker_angle
-        elif dx > 0 and dy < 0:
-            dx = abs(dx)
-            dy = abs(dy)
-            marker_angle = math.degrees(math.atan(dy / dx))
-            marker_angle = 90 + marker_angle
-        elif dx < 0 and dy > 0:
-            dx = abs(dx)
-            dy = abs(dy)
-            marker_angle = math.degrees(math.atan(dy / dx))
-            marker_angle = 270 - marker_angle
-        elif dx < 0 and dy < 0:
-            dx = abs(dx)
-            dy = abs(dy)
-            marker_angle = math.degrees(math.atan(dy / dx))
-            marker_angle = 270 + marker_angle
-        elif dx == 0 and dy > 0:
-            marker_angle = 0
-        elif dx == 0 and dy < 0:
-            marker_angle = 270
-        elif dy == 0 and dx > 0:
-            marker_angle = 90
-        elif dy == 0 and dx < 0:
-            marker_angle = 180
-
-        if marker_angle == 0 and robot_angle > 180:
-            marker_angle = 360
         phi = (-1 * (marker_angle - robot_angle)) 
-        print("{}:{}".format(robot_angle, marker_angle))
-
-        return [phi, marker_angle -  robot_angle]
+        if phi >  50:
+            phi = phi - 360
+        # print("{}:{}".format(robot_angle, marker_angle))
+        if phi < -30 or phi > 30:
+            print(phi)
+        phi = phi + 90
+        return phi
 
     def distance_to_point(self, x, y):
         dx = x - self.real_position[0]
@@ -565,10 +502,13 @@ class Robot():
             self.render_position()
             plt.plot([self.real_position[0], self.fov_points[0][0]],
                      [self.real_position[1], self.fov_points[1][0]],
-                     color='C5')
+                     color='C5', linestyle='--')
             plt.plot([self.real_position[0], self.fov_points[0][1]],
                      [self.real_position[1], self.fov_points[1][1]],
-                     color='C5')
+                     color='C5', linestyle='--')
+            plt.plot([self.fov_points[0][0], self.fov_points[0][1]],
+                     [self.fov_points[1][0], self.fov_points[1][1]],
+                     color='C5', linestyle='--')
             plt.scatter(self.calculated_pos[0],
                         self.calculated_pos[1],
                         color='C3')  # location
@@ -580,21 +520,9 @@ class Robot():
                     x.append(marker_list[i][1])
                     y.append(marker_list[i][2])
             plt.scatter(x, y, color='green')
-            for point in self.seen_vals:
-                s = self.rotation + (-1 * point[1][1])
-                if s > 360:
-                    s -= 360
-                # draw a line from the robot at angle and distance
-                direction_x = self.real_position[0] + point[2] * math.cos(
-                    math.radians(s))
-                direction_y = self.real_position[0] + point[2] * math.sin(
-                    math.radians(s))
-                plt.plot([self.real_position[0], direction_x],
-                         [self.real_position[1], direction_y],
-                         color='blue')
 
         plot_end = time.time()
-        print(f"{self.frame}/{self.max_frame}: {round(plot_end-start, 3)}")
+        # print(f"{self.frame}/{self.max_frame}: {round(plot_end-start, 3)}")
 
         if self.frame == 0:
             fig.savefig(fname="background.png",
@@ -616,7 +544,7 @@ class Robot():
                 self.stich()
                 break
             if len(self.future_movement) == 0:
-                self.move(0, 10)
+                self.move(100, 10)
 
             self.calc_move()
             self.calc_fov_points()
