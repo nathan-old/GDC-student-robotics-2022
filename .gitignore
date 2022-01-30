@@ -176,5 +176,6 @@ dmypy.json
 cython_debug/
 
 # video
-**.avi
-**.mp4
+**/**.avi
+#**/**.mp4
+#**/**.png

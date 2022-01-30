@@ -142,7 +142,126 @@ def get_intersections(x0, y0, r0, x1, y1, r1):
         x4 = x2 - h * (y1 - y0) / d
         y4 = y2 + h * (x1 - x0) / d
         return ([[x3, y3], [x4, y4]])
+
+CONFIG = {
+    'camera': {
+        'fov': 62,
+        'range': 4000
+    },
+    'fps': FPS,
+    'duration': DURATION,
+    'markers_list': marker_list,
+}
+
+class SimulatorCommand():
+    def __init__(self, command, args):
+        self.command = command
+        self.args = args
+
+class SimulatorCamera():
+    def __init__(self, sim, fov, range, marker_list):
+        self.sim = sim
+        self.fov = fov
+        self.range = range
+        self.marker_list = marker_list
+        self.can_see = []
+        self.posed_markers = []
     
+    def angle_to_point(self, x, y):
+        robot_angle = self.rotation
+        dx = x - self.real_position[0]
+        dy = y - self.real_position[1]
+        marker_angle = math.degrees(math.atan2(dx,dy))
+
+        robot_angle -= 90
+        if robot_angle < 0:
+            robot_angle += 360
+        robot_angle = 360 - robot_angle
+        if robot_angle == 360:
+            robot_angle = 0
+        phi = (-1 * (marker_angle - robot_angle)) 
+        if phi >  50:
+            phi = phi - 360
+        if phi < -30 or phi > 30:
+            print(phi)
+        phi = phi + 90
+        return phi
+
+    def distance_to_point(self, x, y):
+        dx = x - self.real_position[0]
+        dy = y - self.real_position[1]
+        return math.sqrt(dx**2 + dy**2)
+    
+    def see_ids(self):
+        self.can_see = []
+        for marker in self.marker_list:
+            id = marker[0]
+            x = marker[1]
+            y = marker[2]
+            if point_in_triangle(
+                (x, y), ((self.fov_points[0][0], self.fov_points[1][0]),
+                         (self.real_position[0], self.real_position[1]),
+                         (self.fov_points[0][1], self.fov_points[1][1]))):
+                self.can_see.append(id)
+    
+    def pose_estimation(self):
+        # The values retruned from the "camera" in order theta, psi, r(distance), marker number
+        points = []  
+        for id in self.can_see:
+            points.append([
+                90,
+                self.angle_to_point(self.marker_list[id][1], self.marker_list[id][2]),
+                self.distance_to_point(self.marker_list[id][1], self.marker_list[id][2]),
+                id
+            ])
+
+        self.posed_markers = points
+    
+    def see(self):
+        self.see_ids()
+        self.pose_estimation()
+        return self.posed_markers
+
+class SimulatorInterface():
+    def __init__(self, parent, config):
+        self.parent = parent
+        self.config = config
+    
+    def move(self, meters, speed=1):
+        cmd = SimulatorCommand('move', [meters, speed])
+        self.parent.update(cmd)
+    
+    def rotate(self, degrees, speed=1):
+        cmd = SimulatorCommand('rotate', [degrees, speed])
+        self.parent.update(cmd)
+    
+    def stop(self):
+        cmd = SimulatorCommand('stop', [])
+        self.parent.update(cmd)
+    
+    def camera(self):
+        return self.parent.camera()
+
+
+class Simulator():
+    def __init__(self, config, fps):
+        self.config = config
+        self.fps = fps
+        self.interface = SimulatorInterface(self, config)
+
+    def render_thread(self):
+        while self.running:
+            ttr = self.render()
+            plt.sleep(max((1 / FPS) - ttr, 0))
+    
+    def render(self):
+        pass # TODO
+
+    def update(self, update):
+        pass
+
+    def camera(self):
+        return SimulatorCamera(self, self.config['camera']['fov'], self.config['camera']['range'], self.config['markers_list'])
 
 
 # inputs from robot camera in degrees and mm
@@ -195,38 +314,6 @@ class Robot():
         self.real_position[0] = min(max(next_x, 0), 5740)
         self.real_position[1] = min(max(next_y, 0), 5740)
 
-    def calculate_seen(self):
-        # TODO: emulate fov, figure out what markers we can see and pass this to calculate_seen_values
-        self.seen_ids = []
-        for marker in marker_list:
-            id = marker[0]
-            x = marker[1]
-            y = marker[2]
-            if point_in_triangle(
-                (x, y), ((self.fov_points[0][0], self.fov_points[1][0]),
-                         (self.real_position[0], self.real_position[1]),
-                         (self.fov_points[0][1], self.fov_points[1][1]))):
-                self.seen_ids.append(id)
-
-        self.seen_markers = self.calculate_seen_values()
-
-    def calculate_seen_values(self):
-        # The values retruned from the "camera" in order theta, psi, r(distance), marker number
-        points = []  #[[90, 90 - 35.678, 1231.1, 8],
-        #            [90, 90, 1000, 9],
-        #            [90, 90 + 35.678, 1231.1, 10]]
-        for id in self.seen_ids:
-            points.append([
-                90,
-                self.angle_to_point(marker_list[id][1], marker_list[id][2]),
-                self.distance_to_point(marker_list[id][1], marker_list[id][2]),
-                id
-            ])
-
-        self.seen_vals = points
-
-        return points
-
     def process_seen_markers(self):
         self.calculated_points = []
         if len(self.seen_markers) == 0:
@@ -235,15 +322,6 @@ class Robot():
         circles = []
         rot = self.rotation
         factor = 90
-        #if rot >= 0 and rot <= 90:
-        #    factor  = 90
-        #elif rot >= 90 and rot <= 180:
-        #    factor = 180
-        #elif rot >= 180 and rot <= 270:
-        #    factor = 270
-        #else:
-        #    factor = 360
-        #print(rot, factor)
         for marker in self.seen_markers:
             #print(marker[3], marker[1])
             point = (marker[2] * math.cos(math.radians(factor - 90)))
@@ -459,32 +537,6 @@ class Robot():
             ax.imshow(img, extent=[0, 5750, 0, 5750], aspect='auto', zorder=0)
 
         return fig
-
-    def angle_to_point(self, x, y):
-        robot_angle = self.rotation
-        dx = x - self.real_position[0]
-        dy = y - self.real_position[1]
-        marker_angle = math.degrees(math.atan2(dx,dy))
-
-        robot_angle -= 90
-        if robot_angle < 0:
-            robot_angle += 360
-        robot_angle = 360 - robot_angle
-        if robot_angle == 360:
-            robot_angle = 0
-        phi = (-1 * (marker_angle - robot_angle)) 
-        if phi >  50:
-            phi = phi - 360
-        # print("{}:{}".format(robot_angle, marker_angle))
-        if phi < -30 or phi > 30:
-            print(phi)
-        phi = phi + 90
-        return phi
-
-    def distance_to_point(self, x, y):
-        dx = x - self.real_position[0]
-        dy = y - self.real_position[1]
-        return math.sqrt(dx**2 + dy**2)
 
     def render_frame(self):
 
