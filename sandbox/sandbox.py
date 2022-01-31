@@ -1,14 +1,10 @@
-# %%
-import re
-import time
 import math
 import random
-import functools
-from threading import Lock
-from turtle import circle, position
 from primatives import *
 import pygame
 from pygame.locals import *
+
+from collider import Rectangle, World
 
 
 class Marker():
@@ -130,6 +126,9 @@ ROT_SPEED = 90  # degrees / s
 FPS = 30
 DURATION = 5  # secconds#
 
+M0 = 0
+M1 = 0
+M2 = 0
 
 class Renderer():
     def __init__(self, res_x, res_y):
@@ -144,32 +143,17 @@ class Renderer():
         self.font = None
 
     def normalise_arena_pos(self, pos):
-        return Vector2D(pos.x/5750, (5750-pos.y)/5750)
+        return Vector2D(pos.x/5750, pos.y/5750)
 
     def position_to_screenspace(self, pos):
-        return Vector2D(pos.x * self.res_x, pos.y * self.res_y)
+        return Vector2D((pos.x * self.res_x) + self.res_x * 0.05, (self.res_y + self.res_y * 0.05) - (pos.y * self.res_y) )
 
     def start(self):
-        if self.display is not None:
-            raise Exception("Renderer already started")
         pygame.init()
-        self.display = pygame.display.set_mode((self.res_x, self.res_y))
+        self.display = pygame.display.set_mode((self.res_x + self.res_x * 0.1, self.res_y  + self.res_y * 0.1), RESIZABLE)
         pygame.display.set_caption("Robot Arena")
         self.clock = pygame.time.Clock()
-        self.font = pygame.font.SysFont(None, 12)
-
-    def load_background(self, reblit=False, event=None):
-        if reblit and event is not None and self.background is not None:
-            screen = pygame.display.set_mode(
-                event.dict['size'], HWSURFACE | DOUBLEBUF | RESIZABLE)
-            screen.blit(pygame.transform.scale(
-                self.background, event.dict['size']), (0, 0))
-            return
-
-        self.background = pygame.image.load('background.png')
-        self.background = pygame.transform.scale(
-            self.background, (self.res_x, self.res_y))
-        self.display.blit(self.background, (0, 0))
+        self.font = pygame.font.SysFont(None, int(0.03 * self.res_x))
 
     def rect(self, pos, w, h, color):
         pygame.draw.rect(self.display, color, [pos.x, pos.y, w, h])
@@ -180,7 +164,8 @@ class Renderer():
                          line.start.y), (line.end.x, line.end.y))
 
     def circle(self, point):
-        pygame.draw.circle(self.display, point.color, (point.x,
+        if point.display:
+            pygame.draw.circle(self.display, point.color, (point.x,
                            point.y), int(0.01 * self.res_x), int(0.01 * self.res_y))
 
     def text(self, text, position, color=pygame.Color("white")):
@@ -188,6 +173,7 @@ class Renderer():
                          (position.x, position.y))
 
     def loop(self, logic_callback):
+        global M0, M1, M2
         if self.display is None:
             raise Exception("Renderer not started")
         self.running = True
@@ -197,9 +183,24 @@ class Renderer():
                 if event.type == pygame.QUIT:
                     self.running = False
                 elif event.type == VIDEORESIZE:
-                    self.load_background(True)
-
-                print(event)
+                    self.res_x = event.w
+                    self.res_y = event.h
+                    self.start()
+                elif event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_LEFT:
+                        M2 -= 0.1
+                        M2 = max(min(M2, 1), -1)
+                    if event.key == pygame.K_RIGHT:
+                        M2 += 0.1
+                        M2 = max(min(M2, 1), -1)
+                    if event.key == pygame.K_UP:
+                        M1 += 0.1
+                        M1 = max(min(M1, 1), -1)
+                        M0 = M1
+                    if event.key == pygame.K_DOWN:
+                        M1 -= 0.15
+                        M1 = max(min(M1, 1), -1)
+                        M0 = M1
             logic_callback(self.frame, 1 / FPS)
 
             self.display.fill((0, 0, 0))
@@ -235,6 +236,12 @@ class Renderer():
         self.lines = lines
         self.points = points
 
+    def add_point(self, point):
+        self.points.append(point)
+    
+    def add_line(self, line):
+        self.lines.append(line)
+
 
 class Map():
 
@@ -248,6 +255,7 @@ class Map():
         self.marker_list = marker_list
         self.ax = None
         self.static = None
+        self.central_box_bounding_box = None
 
     def move_can(self, can_index, new_pos):
         if can_index > len(self.can_list) - 1:
@@ -287,15 +295,11 @@ class Map():
                 Line(self.arena_border[i], self.arena_border[i + 1], pygame.Color('blue')))
 
         return (lines, points)
-        # load the precreated background.png
-        #    img = plt.imread("background.png")
-        #   fig, ax = plt.subplots()
-        #  ax.imshow(img, extent=[0, 5750, 0, 5750], aspect='auto', zorder=0)
 
     # Renders the dynamic elements (cans, markers)
     def render_dynamic(self):
         # Draw markers
-        lines = []
+        lines = [] #self.central_box_bounding_box.as_lines()
         points = []
         for marker in self.marker_list:
             points.append(
@@ -323,13 +327,14 @@ class Map():
             points.append(
                 Point(can_list[i].x, can_list[i].y, pygame.Color('black'), Label(str(i), (255, 255, 255))))
 
-    def set_static(self, pixal_data):
-        self.use_static = True
-        self.static = pixal_data
-        # plt.close(figure)
 
-    def load_static(self):
+    def populate_collider(self, world):
+        #self.central_box_bounding_box = Rectangle(self.central_box[0].x, self.central_box[0].y, self.central_box[2].x - self.central_box[0].x, self.central_box[2].y - self.central_box[0].y)
+        #world.add(self.central_box_bounding_box)
+        # TODO: add walls and cans
         pass
+
+        
 
 
 def point_in_triangle(point, triangle):
@@ -371,15 +376,18 @@ def get_intersections(x0, y0, r0, x1, y1, r1):
     if d == 0 and r0 == r1:
         return [[-3, -3], [-3, -3]]
     else:
-        a = (r0**2 - r1**2 + d**2) / (2 * d)
-        h = math.sqrt(r0**2 - a**2)
-        x2 = x0 + a * (x1 - x0) / d
-        y2 = y0 + a * (y1 - y0) / d
-        x3 = x2 + h * (y1 - y0) / d
-        y3 = y2 - h * (x1 - x0) / d
-        x4 = x2 - h * (y1 - y0) / d
-        y4 = y2 + h * (x1 - x0) / d
-        return ([[x3, y3], [x4, y4]])
+        try:
+            a = (r0**2 - r1**2 + d**2) / (2 * d)
+            h = math.sqrt(r0**2 - a**2)
+            x2 = x0 + a * (x1 - x0) / d
+            y2 = y0 + a * (y1 - y0) / d
+            x3 = x2 + h * (y1 - y0) / d
+            y3 = y2 - h * (x1 - x0) / d
+            x4 = x2 - h * (y1 - y0) / d
+            y4 = y2 + h * (x1 - x0) / d
+            return ([[x3, y3], [x4, y4]])
+        except:
+            return [[-4, -4], [-4, -4]]
 
 
 CONFIG = {
@@ -518,6 +526,15 @@ class SimulatorInterface():
     def camera(self, id):
         return self.parent.get_camera(id)
 
+    def try_move(self, box, pos):
+        return self.parent.try_move(box, pos)
+    
+    def add_point(self, point):
+        self.parent.renderer.add_point(point)
+
+    def add_line(self, line):
+        self.parent.renderer.add_line(line)
+
 
 class RobotInterface():
 
@@ -527,12 +544,18 @@ class RobotInterface():
         self._id = id
         self._interface = interface
         self.motors = [0, 0, 0]  # Power levels for each motor
-        self.wheel_angles = [0, 0, 0]  # Angle of each wheel
         self.wheel_arm_lengths = [0, 0, 0]  # Length of each wheel arm
+        self.wheel_radius = 50  # Radius of the wheels in mm
+        self.max_rpm = 90  # Maximum RPM of each motor
+        self.wheels_distance = 250 # Distance from center of robot to each wheel in mm
         # Choose random color for robot
         r = random.random()
         b = random.random()
         g = random.random()
+        self.bounding_box = []
+        for wheel in self.wheel_positions():
+            self.bounding_box.append(
+                Rectangle(wheel.x - self.wheel_radius, wheel.y - self.wheel_radius, 2 * self.wheel_radius, 2 * self.wheel_radius))
 
         self._color = (r, g, b)
 
@@ -560,6 +583,14 @@ class RobotInterface():
     def color(self):
         return self._color
 
+    def wheel_positions(self,x=0,y=0):
+        x = x if x != 0 else self.x
+        y = y if y != 0 else self.y
+        return [Vector2D(x-self.wheels_distance*math.cos(math.radians(self.bearing.angle)), y-self.wheels_distance*math.sin(math.radians(self.bearing.angle))),
+                Vector2D(x+self.wheels_distance*math.cos(math.radians(self.bearing.angle + 30)), y+self.wheels_distance*math.sin(math.radians(self.bearing.angle + 30))),
+                Vector2D(x+self.wheels_distance*math.cos(math.radians(self.bearing.angle - 30)), y+self.wheels_distance*math.sin(math.radians(self.bearing.angle - 30))),
+            ]
+
     @property
     def interface(self):
         return self._interface
@@ -569,6 +600,20 @@ class RobotInterface():
         return self._interface.camera(self._id)
 
     def set_position(self, x, y):
+        # calculate the position of the wheels at new location
+        #wheels = self.wheel_positions(x, y)
+        #wheel_positions = []
+        #i = 0
+        #for wheel in wheels:
+        #    wheel_pos = self._interface.try_move(self.bounding_box[i], Vector2D(wheel.x, wheel.y))
+        #    wheel_positions.append(wheel_pos)
+        #    self.bounding_box[i].pos = wheel_pos.x, wheel_pos.y
+        #    i += 1
+        
+        # find the center of the wheel_positions
+        #x_center = (self.bounding_box[0].pos.x + self.bounding_box[1].pos.x + self.bounding_box[2].pos.x) / 3
+        #y_center = (self.bounding_box[0].pos.y + self.bounding_box[1].pos.y + self.bounding_box[2].pos.y) / 3
+        #print(100 * ((x_center - x) / x))
         self._pos = Vector2D(x, y)
 
     def set_bearing(self, bearing):
@@ -583,11 +628,38 @@ class RobotInterface():
             if index >= len(self.motors):
                 raise Exception("Motor index out of range")
             self.motors[index] = power
+    def wheel_velocites(self):
+        velocities = []
+        for i in range(len(self.motors)):
+            rpm = self.motors[i] * self.max_rpm
+            velocities.append((rpm * (2 * math.pi * self.wheel_radius)) / 60)
+        return velocities # mm/s
 
     def run_motors(self, time):
         # TODO: Calculate the new x,y position and rotation using: Current motor speeds, motor/wheel positon info, current position and rotation and time (which is in secconds)
         # This is probably done by creating a force vector, multiplying it by time applying it to the robot
-        pass
+        wheel_velocities = self.wheel_velocites()
+        print("Wheel velocities: {}".format(wheel_velocities))
+        x = (math.sqrt(3)/3) * ((wheel_velocities[0] + wheel_velocities[1]) * time)
+        y = (1/3) * ((wheel_velocities[0] + wheel_velocities[1]) * time) 
+        if x != 0:
+            x -= (2/3 * wheel_velocities[2] * time)
+        front_angular = 0
+        if wheel_velocities[0] > wheel_velocities[1]:
+            front_angular = wheel_velocities[0] - wheel_velocities[1]
+        elif wheel_velocities[0] < wheel_velocities[1]:
+            front_angular = wheel_velocities[1] - wheel_velocities[0]
+
+        angular =  (1/(3 * self.wheels_distance)) * ((wheel_velocities[2] + front_angular) * time)
+        print("x: {} y: {}, w: {}".format(x, y, math.degrees(angular)))
+        self._bearing._angle += math.degrees(angular)
+        self._bearing._angle = round(self._bearing._angle % 360, 1)
+        next_x = self.x + x * math.cos(
+            math.radians(self.bearing.angle))
+        next_y = self.y + y * math.sin(
+            math.radians(self.bearing.angle))
+        self.set_position(min(max(next_x, 0), 5740),
+                        min(max(next_y, 0), 5740))
 
 
 class Bearing():
@@ -623,6 +695,7 @@ class Simulator():
         self.updates = []
         self.map = Map(central_box, arena_border, can_list,
                        point_zone, start_boxes, marker_list)
+        self.world = World()
         self.frame = 0
         self.renderer = None
         self.running = False
@@ -631,8 +704,19 @@ class Simulator():
     def interface(self):
         return self._interface
 
+    def try_move(self, box, position):
+        # Try to move bounding box to position, returns a Vector2D of the final position
+        # if the move is possible this will be the same as position
+        # if the move is not possible this will be the closest possible position
+        def filter(t,o):
+            return "slide"
+        return self.world.check_move(box, position, filter)[0]
+
     def add_robot(self, robot, controlled=False):
         self.robots.append(robot)
+        for b in robot.bounding_box:
+            self.world.add(b)
+        
         if controlled:
             if self.controlled_robot is not None:
                 raise Exception("Only one robot can be controlled at a time")
@@ -668,12 +752,14 @@ class Simulator():
             robot.run_motors(1 / self.fps)
 
     def run(self):
+        self.map.populate_collider(self.world)
         self.running = True
-        self.renderer = Renderer(600, 600)
+        self.renderer = Renderer(800, 800)
         self.renderer.start()
         self.renderer.loop(self.logic_thread)
 
     def logic_thread(self, i, t):
+        self.renderer.set([],[])
         if self.frame > self.duration * self.fps or not self.running:
             print("exit case")
             self.animation = None
@@ -690,17 +776,21 @@ class Simulator():
         print("Rendered dynamic map")
         robot_lines, robot_points = self.render_robots()
         print("Rendered {} robots".format(len(self.robots)))
-        self.renderer.set(lines_static + lines + robot_lines,
-                          points_static + points + robot_points)
+        for line in lines_static + lines + robot_lines:
+            self.renderer.add_line(line)
+        for point in points_static + points + robot_points:
+            self.renderer.add_point(point)
         self.frame = i
-        self.robots[0].bearing._angle += 1
 
     def render_robots(self):
         points = []
         lines = []
         for robot in self.robots:
-            points.append(
-                Point(robot.x, robot.y, (255, 0, 255), Label(str(robot.id), pygame.Color('white'))))
+            points += [
+                Point(robot.x-robot.wheels_distance*math.cos(math.radians(robot.bearing.angle)), robot.y-robot.wheels_distance*math.sin(math.radians(robot.bearing.angle)), (int(((robot.motors[2] +1) / 2) * 255), int(((robot.motors[2] + 1) / 2) * 255), 0), Label("M3", pygame.Color('white'))),
+                Point(robot.x+robot.wheels_distance*math.cos(math.radians(robot.bearing.angle + 30)), robot.y+robot.wheels_distance*math.sin(math.radians(robot.bearing.angle + 30)), (int(((robot.motors[0] + 1) / 2) * 255), int(((robot.motors[0] + 1) / 2) * 255), 0), Label("M0", pygame.Color('white'))),
+                Point(robot.x+robot.wheels_distance*math.cos(math.radians(robot.bearing.angle - 30)), robot.y+robot.wheels_distance*math.sin(math.radians(robot.bearing.angle - 30)), (int(((robot.motors[1] + 1) / 2) * 255), int(((robot.motors[1] + 1) / 2) * 255), 0), Label("M1", pygame.Color('white'))),
+            ]
 
             direction_x = robot.x + robot.camera.range / 2 * math.cos(
                 math.radians(robot.bearing.angle))
@@ -717,58 +807,13 @@ class Simulator():
                 Line(Vector2D(
                     robot.camera.fov_points[0][0], robot.camera.fov_points[1][0]), Vector2D(
                     robot.camera.fov_points[0][1], robot.camera.fov_points[1][1]),  pygame.Color('orange'))
-            ]
+            ] 
+            #for box in robot.bounding_box:
+            #    lines += box.as_lines()
+            points.append(Point(direction_x, direction_y, pygame.Color('red'), Label("{}".format(robot.bearing.angle), pygame.Color('white')), False))
         return (lines, points)
 
-    def frame_setup(self):
-        return
-        fig = self.process_background()  # renders or loads the background
-        if self.frame != 0:
-            ax = plt.gca()
-            ax.set_xlim([0, 6000])
-            ax.set_ylim([0, 6000])
-            self.render_points()
-            self.render_position()
-            plt.plot([self.real_position[0], self.fov_points[0][0]],
-                     [self.real_position[1], self.fov_points[1][0]],
-                     color=pygame.Color("#8c564b"),
-                     linestyle='--')
-            plt.plot([self.real_position[0], self.fov_points[0][1]],
-                     [self.real_position[1], self.fov_points[1][1]],
-                     color=pygame.Color("#8c564b"),
-                     linestyle='--')
-            plt.plot([self.fov_points[0][0], self.fov_points[0][1]],
-                     [self.fov_points[1][0], self.fov_points[1][1]],
-                     color=pygame.Color("#8c564b"),
-                     linestyle='--')
-            plt.scatter(self.calculated_pos[0],
-                        self.calculated_pos[1],
-                        color=pygame.Color("#d62728"))  # location
-            x = []
-            y = []
-
-            for i in range(len(marker_list)):
-                if marker_list[i].id in self.seen_ids:
-                    x.append(marker_list[i].x)
-                    y.append(marker_list[i].y)
-            plt.scatter(x, y, color='green')
-
-        plot_end = time.time()
-        # print(f"{self.frame}/{self.max_frame}: {round(plot_end-start, 3)}")
-
-        if self.frame == 0:
-            fig.savefig(fname="background.png",
-                        dpi=500,
-                        transparent=True,
-                        bbox_inches='tight',
-                        pad_inches=0)
-        else:
-            path = 'out/{}.png'.format(self.frame)
-            self.async_plotter.save(fig, path)
-
     def update(self, update):
-        if update.command == 'check':
-            return update.data[0]
         self.updates.append(update)
 
     def get_camera(self, robot):
@@ -785,20 +830,13 @@ class RobotController(RobotInterface):
         self.calculated_points = []
         self.future_movement = []
         self.seen_markers = []  # Stores the output of camera.see()
+        self.last_points = []
+        self.last_point_every = 15
+        self.last_points_counter = 0
+        self.last_point_max = 20
 
-    def move(self, amount, rot=0):
-        speed = MAX_SPEED / FPS
-        rotation_speed = ROT_SPEED / FPS
-        x_left = amount
-        rot_left = rot
-        while x_left > 0 or rot_left > 0:
-            mov_x = min(x_left, speed)
-            mov_rot = min(rot_left, rotation_speed)
-            self.future_movement.append([mov_x, mov_rot])
-            x_left -= mov_x
-            rot_left -= mov_rot
-            x_left = max(0, x_left)
-            rot_left = max(0, rot_left)
+    def move(self, distance):
+        pass
 
     def process_seen_markers(self):
         self.calculated_points = []
@@ -857,15 +895,27 @@ class RobotController(RobotInterface):
         # TODO: Now choose what we are going to do (eg send movement commands, calulate position etc)
         self.seen_markers=self.camera.see()
         self.process_seen_markers()
+        self.interface.add_point(Point(self.calculated_pos[0], self.calculated_pos[1], pygame.Color('red'), Label(str(self.id), pygame.Color('white'))))
+        #for i in range(len(self.last_points)):
+        #    print(self.last_points[i].position.x, self.last_points[i].position.y)
+        #    self.interface.add_point(self.last_points[i])
+            #self.interface.add_line(Line(self.last_points[i].position, self.last_points[i+1].position, pygame.Color('red')))
+            
+        #self.last_points_counter += 1
+        #if self.last_points_counter > self.last_point_every:
+        #    self.last_points_counter = 0
+        #    self.last_points.append(Point(int(self.calculated_pos[0]), int(self.calculated_pos[1]), pygame.Color('grey'), Label(str(len(self.last_points)), pygame.Color('white')), False))
+        #    if len(self.last_points) > self.last_point_max:
+        #        self.last_points.pop(0)
+        self.motors[2] = M2
+        self.motors[0] = M0
+        self.motors[1] = M1
+
         pass
 
 
 if __name__ == "__main__":
     sim=Simulator(CONFIG)
-    sim.add_robot(RobotController(Vector2D(2500, 2500),
-                  Bearing(0), sim.interface, 0))
+    sim.add_robot(RobotController(Vector2D(500, 500),
+                  Bearing(50), sim.interface, 0))
     sim.run()
-
-    # sim.animation.save("project.avi")
-
-# %%

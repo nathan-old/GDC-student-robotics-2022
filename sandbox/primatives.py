@@ -15,11 +15,12 @@ class Vector2D():
 
 class Point():
 
-    def __init__(self, x, y, color, label):
+    def __init__(self, x, y, color, label, display=True):
         self._x = x
         self._y = y
         self._color = color
         self._label = label
+        self.display = display
 
     @property
     def position(self):
