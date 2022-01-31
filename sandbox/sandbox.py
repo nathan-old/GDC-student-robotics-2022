@@ -1,96 +1,14 @@
 # %%
-import matplotlib.pyplot as plt
-import matplotlib.animation as animation
-import time, matplotlib
-import math, random, functools
-
-matplotlib.use('Agg')
-
-
-class Vector2D():
-
-    def __init__(self, x, y):
-        self._x = x
-        self._y = y
-
-    @property
-    def x(self):
-        return self._x
-
-    @property
-    def y(self):
-        return self._y
-
-
-class Point():
-
-    def __init__(self, x, y, color, label):
-        self._x = x
-        self._y = y
-        self._color = color
-        self._label = label
-
-    @property
-    def position(self):
-        return Vector2D(self._x, self._y)
-
-    @property
-    def x(self):
-        return self._x
-
-    @property
-    def y(self):
-        return self._y
-
-
-class Label():
-
-    def __init__(self, text, color, offset=Vector2D(0, 0)):
-        self._text = text
-        self._color = color
-        self._offset = offset
-
-    @property
-    def text(self):
-        return self._text
-
-    @property
-    def color(self):
-        return self._color
-
-    @property
-    def offset(self):
-        return self._offset
-
-
-class Line():
-
-    def __init__(self, start, end, color, linestyle='solid', linewidth=1):
-        self._start = start
-        self._end = end
-        self._color = color
-        self._linestyle = linestyle
-        self._linewidth = linewidth
-
-    @property
-    def start(self):
-        return self._start
-
-    @property
-    def end(self):
-        return self._end
-
-    @property
-    def color(self):
-        return self._color
-
-    @property
-    def linestyle(self):
-        return self._linestyle
-
-    @property
-    def linewidth(self):
-        return self._linewidth
+import re
+import time
+import math
+import random
+import functools
+from threading import Lock
+from turtle import circle, position
+from primatives import *
+import pygame
+from pygame.locals import *
 
 
 class Marker():
@@ -108,94 +26,17 @@ class Marker():
     def can_see(self):
         return self._can_see
 
+    @property
+    def x(self):
+        return self._position.x
 
-class Map():
+    @property
+    def y(self):
+        return self._position.y
 
-    def __init__(self, central_box, arena_border, can_list, point_zone,
-                 start_boxes, marker_list):
-        self.central_box = central_box
-        self.arena_border = arena_border
-        self.can_list = can_list
-        self.point_zone = point_zone
-        self.start_boxes = start_boxes
-        self.marker_list = marker_list
-
-    def move_can(self, can_index, new_pos):
-        if can_index > len(self.can_list) - 1:
-            raise Exception("Can index out of bounds")
-        if type(new_pos) != Vector2D:
-            raise Exception("New position must be a vector")
-        self.can_list[can_index] = new_pos
-
-    def set_can_see_marker(self, marker_id, can_see):
-        if marker_id > len(self.marker_list) - 1:
-            raise Exception("Marker index out of bounds")
-
-        self.marker_list[marker_id].can_see = can_see
-
-    # Renders the background image from the static elements
-    def render_static(self):
-        # Draw start boxes/zones
-        lines = []
-        points = []
-        for i in range(len(self.start_boxes) - 1):
-            lines.append(Line(self.start_boxes[i], self.start_boxes[i + 1],
-                              ''))
-
-        # Draw central raised platform
-        for i in range(len(self.central_box) - 1):
-            lines.append(Line(self.central_box[i], self.central_box[i + 1],
-                              ''))
-
-        # Draw point zones
-        for i in range(len(self.point_zone)):
-            lines.append(
-                Line(self.point_zone[i], self.point_zone[i], 'r', '--'))
-
-        # Draw arena border
-        for i in range(len(self.arena_border)):
-            lines.append(Line(self.arena_border[i], self.arena_border[i], 'b'))
-
-        # Draw cans
-        for i in range(len(can_list)):
-            points.append(Point(can_list[i].x, can_list[i].y, 'r', 'i'))
-
-        return [lines, points]
-        # load the precreated background.png
-        #    img = plt.imread("background.png")
-        #   fig, ax = plt.subplots()
-        #  ax.imshow(img, extent=[0, 5750, 0, 5750], aspect='auto', zorder=0)
-
-    # Renders the dynamic elements (cans, markers)
-    def render_dynamic(self):
-        # Draw markers
-        lines = []
-        points = []
-        for marker in self.marker_list:
-            points.append(
-                Point(marker.x, marker.y, 'g' if marker.can_see else 'r'))
-
-        for i in range(len(points)):
-            if i < 7:
-                points[i]._label = Label(str(i), 'w', Vector2D(0, -40))
-            elif 6 < i < 14:
-                points[i]._label = Label(str(i), 'w', Vector2D(0, -60))
-            elif 13 < i < 21:
-                points[i]._label = Label(str(i), 'w', Vector2D(0, +40))
-            elif 20 < i < 28:
-                points[i]._label = Label(str(i), 'w', Vector2D(0, +60))
-            else:
-                points[i]._label = Label(str(i), 'w')
-
-        def set_static(self, figure):
-            self.use_static = True
-
-            figure.savefig(fname="background.png",
-                           dpi=500,
-                           transparent=True,
-                           bbox_inches='tight',
-                           pad_inches=0)
-            plt.close(figure)
+    @property
+    def id(self):
+        return self._id
 
 
 central_box = [
@@ -286,8 +127,209 @@ marker_list = [
 
 MAX_SPEED = 500  # Max speed (mm/s)
 ROT_SPEED = 90  # degrees / s
-FPS = 4
-DURATION = 10  # secconds
+FPS = 30
+DURATION = 5  # secconds#
+
+
+class Renderer():
+    def __init__(self, res_x, res_y):
+        self.display = None
+        self.res_x = res_x
+        self.res_y = res_y
+        self.clock = None
+        self.running = False
+        self.frame = 0
+        self.points = []
+        self.lines = []
+        self.font = None
+
+    def normalise_arena_pos(self, pos):
+        return Vector2D(pos.x/5750, (5750-pos.y)/5750)
+
+    def position_to_screenspace(self, pos):
+        return Vector2D(pos.x * self.res_x, pos.y * self.res_y)
+
+    def start(self):
+        if self.display is not None:
+            raise Exception("Renderer already started")
+        pygame.init()
+        self.display = pygame.display.set_mode((self.res_x, self.res_y))
+        pygame.display.set_caption("Robot Arena")
+        self.clock = pygame.time.Clock()
+        self.font = pygame.font.SysFont(None, 12)
+
+    def load_background(self, reblit=False, event=None):
+        if reblit and event is not None and self.background is not None:
+            screen = pygame.display.set_mode(
+                event.dict['size'], HWSURFACE | DOUBLEBUF | RESIZABLE)
+            screen.blit(pygame.transform.scale(
+                self.background, event.dict['size']), (0, 0))
+            return
+
+        self.background = pygame.image.load('background.png')
+        self.background = pygame.transform.scale(
+            self.background, (self.res_x, self.res_y))
+        self.display.blit(self.background, (0, 0))
+
+    def rect(self, pos, w, h, color):
+        pygame.draw.rect(self.display, color, [pos.x, pos.y, w, h])
+
+    def line(self, line):
+        # print("Line: start ({}, {}), end ({}, {})".format(line.start.x, line.start.y, line.end.x, line.end.y))
+        pygame.draw.line(self.display, line.color, (line.start.x,
+                         line.start.y), (line.end.x, line.end.y))
+
+    def circle(self, point):
+        pygame.draw.circle(self.display, point.color, (point.x,
+                           point.y), int(0.01 * self.res_x), int(0.01 * self.res_y))
+
+    def text(self, text, position, color=pygame.Color("white")):
+        self.display.blit(self.font.render(text, True, color),
+                         (position.x, position.y))
+
+    def loop(self, logic_callback):
+        if self.display is None:
+            raise Exception("Renderer not started")
+        self.running = True
+
+        while self.running:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    self.running = False
+                elif event.type == VIDEORESIZE:
+                    self.load_background(True)
+
+                print(event)
+            logic_callback(self.frame, 1 / FPS)
+
+            self.display.fill((0, 0, 0))
+            for point in self.points:
+                point_pos = self.position_to_screenspace(
+                    self.normalise_arena_pos(point.position))
+                point._x = point_pos.x
+                point._y = point_pos.y
+                self.circle(point)
+                if point.label is not None:
+                    label = point.label
+                    label_pos = point.position
+                    if label.offset.x != 0 or label.offset.x != 0:
+                        label_pos._x += label.offset.x
+                        label_pos._y += label.offset.y
+                    self.text(label.text, label_pos, label.color)
+
+            for line in self.lines:
+                line._start = self.position_to_screenspace(
+                    self.normalise_arena_pos(line.start))
+                line._end = self.position_to_screenspace(
+                    self.normalise_arena_pos(line.end))
+                self.line(line)
+
+            pygame.display.flip()
+            self.frame += 1
+            self.clock.tick(FPS)
+
+        pygame.quit()
+        quit()
+
+    def set(self, lines, points):
+        self.lines = lines
+        self.points = points
+
+
+class Map():
+
+    def __init__(self, central_box, arena_border, can_list, point_zone,
+                 start_boxes, marker_list):
+        self.central_box = central_box
+        self.arena_border = arena_border
+        self.can_list = can_list
+        self.point_zone = point_zone
+        self.start_boxes = start_boxes
+        self.marker_list = marker_list
+        self.ax = None
+        self.static = None
+
+    def move_can(self, can_index, new_pos):
+        if can_index > len(self.can_list) - 1:
+            raise Exception("Can index out of bounds")
+        if type(new_pos) != Vector2D:
+            raise Exception("New position must be a vector")
+        self.can_list[can_index] = new_pos
+
+    def set_can_see_marker(self, marker_id, can_see):
+        if marker_id > len(self.marker_list) - 1:
+            raise Exception("Marker index out of bounds")
+
+        self.marker_list[marker_id].can_see = can_see
+
+    # Renders the background image from the static elements
+    def render_static(self):
+        # Draw start boxes/zones
+        lines = []
+        points = []
+        for i in range(len(self.start_boxes) - 1):
+            lines.append(
+                Line(self.start_boxes[i], self.start_boxes[i + 1], pygame.Color('blue')))
+
+        # Draw central raised platform
+        for i in range(len(self.central_box) - 1):
+            lines.append(Line(self.central_box[i], self.central_box[i + 1],
+                              pygame.Color('grey')))
+
+        # Draw point zones
+        for i in range(len(self.point_zone)-1):
+            lines.append(
+                Line(self.point_zone[i], self.point_zone[i+1], pygame.Color('red'), '--'))
+
+        # Draw arena border
+        for i in range(len(self.arena_border)-1):
+            lines.append(
+                Line(self.arena_border[i], self.arena_border[i + 1], pygame.Color('blue')))
+
+        return (lines, points)
+        # load the precreated background.png
+        #    img = plt.imread("background.png")
+        #   fig, ax = plt.subplots()
+        #  ax.imshow(img, extent=[0, 5750, 0, 5750], aspect='auto', zorder=0)
+
+    # Renders the dynamic elements (cans, markers)
+    def render_dynamic(self):
+        # Draw markers
+        lines = []
+        points = []
+        for marker in self.marker_list:
+            points.append(
+                Point(marker.x, marker.y, (0, 255, 0) if marker.can_see else (255, 0, 0), Label(str(marker.id), (255, 255, 255))))
+
+        for i in range(len(points)):
+            if i < 7:
+                points[i]._label = Label(
+                    str(i), (255, 255, 255), Vector2D(0, -40))
+            elif 6 < i < 14:
+                points[i]._label = Label(
+                    str(i), (255, 255, 255), Vector2D(0, -60))
+            elif 13 < i < 21:
+                points[i]._label = Label(
+                    str(i), (255, 255, 255), Vector2D(0, +40))
+            elif 20 < i < 28:
+                points[i]._label = Label(
+                    str(i), (255, 255, 255), Vector2D(0, +60))
+            else:
+                points[i]._label = Label(str(i), (255, 255, 255))
+            return (lines, points)
+
+        # Draw cans
+        for i in range(len(can_list)):
+            points.append(
+                Point(can_list[i].x, can_list[i].y, pygame.Color('black'), Label(str(i), (255, 255, 255))))
+
+    def set_static(self, pixal_data):
+        self.use_static = True
+        self.static = pixal_data
+        # plt.close(figure)
+
+    def load_static(self):
+        pass
 
 
 def point_in_triangle(point, triangle):
@@ -364,16 +406,16 @@ class SimulatorCommand():
 
 class SimulatorCamera():
 
-    def __init__(self, sim, fov, range, marker_list, robot):
+    def __init__(self, sim, fov, range, marker_list, id):
         self.sim = sim
         self.fov = fov
         self.range = range
-        self.id = robot
+        self.robot = self.sim.get_robot(id)
         self.marker_list = marker_list
         self.can_see = []
         self.posed_markers = []
 
-    @functools.cached_property
+    @property
     def fov_points(self):
         x = self.robot.x
         y = self.robot.y
@@ -420,14 +462,13 @@ class SimulatorCamera():
     def see_ids(self):
         self.can_see = []
         for marker in self.marker_list:
-            id = marker[0]
-            x = marker[1]
-            y = marker[2]
+            self.sim.map.marker_list[marker.id]._can_see = False
             if point_in_triangle(
-                (x, y), ((self.fov_points[0][0], self.fov_points[1][0]),
-                         (self.robot.x, self.robot.y),
-                         (self.fov_points[0][1], self.fov_points[1][1]))):
-                self.can_see.append(id)
+                (marker.x, marker.y), ((self.fov_points[0][0], self.fov_points[1][0]),
+                                       (self.robot.x, self.robot.y),
+                                       (self.fov_points[0][1], self.fov_points[1][1]))):
+                self.can_see.append(marker.id)
+                self.sim.map.marker_list[marker.id]._can_see = True
 
     def pose_estimation(self):
         # The values retruned from the "camera" in order theta, psi, r(distance), marker number
@@ -435,10 +476,10 @@ class SimulatorCamera():
         for id in self.can_see:
             self.posed_markers.append([
                 90,
-                self.angle_to_point(self.marker_list[id][1],
-                                    self.marker_list[id][2]),
-                self.distance_to_point(self.marker_list[id][1],
-                                       self.marker_list[id][2]), id
+                self.angle_to_point(self.marker_list[id].x,
+                                    self.marker_list[id].y),
+                self.distance_to_point(self.marker_list[id].x,
+                                       self.marker_list[id].y), id
             ])
 
     def see(self):
@@ -469,8 +510,13 @@ class SimulatorInterface():
         cmd = SimulatorCommand(r.id, 'stop', [])
         self.parent.update(cmd)
 
-    def camera(self, r):
-        return self.parent.get_camera(r.id)
+    def check(self):
+        salt = random.randint(0, 256)
+        cmd = SimulatorCommand(None, 'check', [salt])
+        return self.parent.update(cmd) == salt
+
+    def camera(self, id):
+        return self.parent.get_camera(id)
 
 
 class RobotInterface():
@@ -517,6 +563,10 @@ class RobotInterface():
     @property
     def interface(self):
         return self._interface
+
+    @property
+    def camera(self):
+        return self._interface.camera(self._id)
 
     def set_position(self, x, y):
         self._pos = Vector2D(x, y)
@@ -571,7 +621,10 @@ class Simulator():
         self.robots = []
         self.controlled_robot = None
         self.updates = []
-
+        self.map = Map(central_box, arena_border, can_list,
+                       point_zone, start_boxes, marker_list)
+        self.frame = 0
+        self.renderer = None
         self.running = False
 
     @property
@@ -586,8 +639,10 @@ class Simulator():
 
             self.controlled_robot = robot
 
+    def get_robot(self, id):
+        return self.robots[id]
+
     def process_updates(self):
-        print("Proc updates")
         for update in self.updates:
             if update.command == 'move':
                 robot = self.robots[update.robot_id]
@@ -608,59 +663,65 @@ class Simulator():
             elif update.command == 'stop':
                 self.running = False
             else:
-                print("Unknown command {}".format(update.command))
+                print("Unknown sim command {}".format(update.command))
         for robot in self.robots:
             robot.run_motors(1 / self.fps)
 
     def run(self):
         self.running = True
-        self.figure = plt.figure()
-        self.animation = animation.FuncAnimation(self.figure,
-                                                 self.logic_thread,
-                                                 interval=1 / self.fps)
+        self.renderer = Renderer(600, 600)
+        self.renderer.start()
+        self.renderer.loop(self.logic_thread)
 
-    def logic_thread(self, frame):
-        if frame > self.duration * self.fps or not self.running:
-            self.animation.pause()
+    def logic_thread(self, i, t):
+        if self.frame > self.duration * self.fps or not self.running:
+            print("exit case")
             self.animation = None
             self.running = False
+
+        for robot in self.robots:
+            robot.tick(t)
         self.process_updates()
-        self.render(frame)
+
+        print("Frame {}/{}".format(self.frame, self.fps * self.duration))
+
+        lines_static, points_static = self.map.render_static()
+        lines, points = self.map.render_dynamic()
+        print("Rendered dynamic map")
+        robot_lines, robot_points = self.render_robots()
+        print("Rendered {} robots".format(len(self.robots)))
+        self.renderer.set(lines_static + lines + robot_lines,
+                          points_static + points + robot_points)
+        self.frame = i
+        self.robots[0].bearing._angle += 1
 
     def render_robots(self):
+        points = []
+        lines = []
         for robot in self.robots:
-            self.points_to_display.append(
-                Point(robot.x, robot.y, 'C2', Label(str(robot.id), '')))
+            points.append(
+                Point(robot.x, robot.y, (255, 0, 255), Label(str(robot.id), pygame.Color('white'))))
 
             direction_x = robot.x + robot.camera.range / 2 * math.cos(
                 math.radians(robot.bearing.angle))
             direction_y = robot.y + robot.camera.range / 2 * math.sin(
                 math.radians(robot.bearing.angle))
-            self.lines_to_display.append(
-                Line(robot.x, robot.y, direction_x, direction_y, 'C2'))
-
-    def render_points(self):
-        for point in self.points_to_display:
-            plt.scatter(point.x,
-                        point.y,
-                        color='C1' if point.color == '' else point.color)
-            if point.label != '':
-                plt.text(point.x,
-                         point.y,
-                         point.label.text,
-                         horizontalalignment='center',
-                         verticalalignment='center',
-                         fontsize=5,
-                         color='w'
-                         if point.lable.color == '' else point.label.color)
-
-    def render_lines(self):
-        for line in self.lines_to_display:
-            plt.plot([line.start.x, line.end.x], [line.start.y, line.end.y],
-                     linestyle=':' if line.linestyle == '' else line.linestyle,
-                     color='C1' if line.color == '' else line.color)
+            lines.append(
+                Line(Vector2D(robot.x, robot.y), Vector2D(direction_x, direction_y), pygame.Color('green')))
+            # FOV points
+            lines += [
+                Line(robot.position, Vector2D(
+                    robot.camera.fov_points[0][0], robot.camera.fov_points[1][0]), pygame.Color('orange')),
+                Line(robot.position, Vector2D(
+                    robot.camera.fov_points[0][1], robot.camera.fov_points[1][1]),  pygame.Color('orange')),
+                Line(Vector2D(
+                    robot.camera.fov_points[0][0], robot.camera.fov_points[1][0]), Vector2D(
+                    robot.camera.fov_points[0][1], robot.camera.fov_points[1][1]),  pygame.Color('orange'))
+            ]
+        return (lines, points)
 
     def frame_setup(self):
+        return
         fig = self.process_background()  # renders or loads the background
         if self.frame != 0:
             ax = plt.gca()
@@ -670,26 +731,26 @@ class Simulator():
             self.render_position()
             plt.plot([self.real_position[0], self.fov_points[0][0]],
                      [self.real_position[1], self.fov_points[1][0]],
-                     color='C5',
+                     color=pygame.Color("#8c564b"),
                      linestyle='--')
             plt.plot([self.real_position[0], self.fov_points[0][1]],
                      [self.real_position[1], self.fov_points[1][1]],
-                     color='C5',
+                     color=pygame.Color("#8c564b"),
                      linestyle='--')
             plt.plot([self.fov_points[0][0], self.fov_points[0][1]],
                      [self.fov_points[1][0], self.fov_points[1][1]],
-                     color='C5',
+                     color=pygame.Color("#8c564b"),
                      linestyle='--')
             plt.scatter(self.calculated_pos[0],
                         self.calculated_pos[1],
-                        color='C3')  # location
+                        color=pygame.Color("#d62728"))  # location
             x = []
             y = []
 
             for i in range(len(marker_list)):
-                if marker_list[i][0] in self.seen_ids:
-                    x.append(marker_list[i][1])
-                    y.append(marker_list[i][2])
+                if marker_list[i].id in self.seen_ids:
+                    x.append(marker_list[i].x)
+                    y.append(marker_list[i].y)
             plt.scatter(x, y, color='green')
 
         plot_end = time.time()
@@ -705,44 +766,21 @@ class Simulator():
             path = 'out/{}.png'.format(self.frame)
             self.async_plotter.save(fig, path)
 
-        self.frame += 1
-
     def update(self, update):
+        if update.command == 'check':
+            return update.data[0]
         self.updates.append(update)
 
-    def camera(self, robot):
+    def get_camera(self, robot):
         return SimulatorCamera(self, self.config['camera']['fov'],
                                self.config['camera']['range'],
                                self.config['markers_list'], robot)
 
-    def render(self, frame):
-        plt.clf()
-        plt.rcParams["figure.figsize"] = (6, 6)
-        plt.xlim(0, 5750)
-        plt.ylim(0, 5750)
-        plt.axis("off")
-        if frame == 0:
-            lines, points = self.map.render_static(self.figure)
-            self.lines_to_display = lines
-            self.points_to_display = points
-            self.render_points()
-            self.render_lines()
-            self.map.set_static(self.figure)
-            return
-        else:
-            self.map.load_static(self.figure)
-            lines, points = self.map.render_dynamic(self.figure)
-            self.lines_to_display += lines
-            self.points_to_display += points
-            self.render_robots()
-            self.render_points()
-            self.render_lines()
-            self.show_frame()
 
+class RobotController(RobotInterface):
 
-class RobotController():
-
-    def __init__(self, max_frame=100, camera_fov=62, camera_distance=4000):
+    def __init__(self, start_pos, start_bearing, interface, id):
+        super().__init__(start_pos, start_bearing, interface, id)
         self.calculated_pos = [0, 0]
         self.calculated_points = []
         self.future_movement = []
@@ -766,7 +804,7 @@ class RobotController():
         self.calculated_points = []
         if len(self.seen_markers) == 0:
             return
-        #process each seen marker and output a point on the map it suggests the location of the camera is
+        # process each seen marker and output a point on the map it suggests the location of the camera is
         circles = []
         for marker in self.seen_markers:
             point = (marker[2] * math.cos(math.radians(90 - marker[0])))
@@ -781,10 +819,10 @@ class RobotController():
             circle_one = circles[i]
             circle_two = circles[a]
             marker_one = [
-                marker_list[circle_one[3]][1], marker_list[circle_one[3]][2]
+                marker_list[circle_one[3]].x, marker_list[circle_one[3]].y
             ]
             marker_two = [
-                marker_list[circle_two[3]][1], marker_list[circle_two[3]][2]
+                marker_list[circle_two[3]].x, marker_list[circle_two[3]].y
             ]
 
             # circle (0: psi, 1: dist, 2: point, 3: marker id)
@@ -803,24 +841,31 @@ class RobotController():
         avg_y = sum(valid_points[1]) / len(valid_points[1])
         self.calculated_pos = [avg_x, avg_y]
         # print the percentage diffrence between the real position and the calculated position
+        x_diff = round(
+                100 * (self.position.x - avg_x) / self.position.x,
+                1)
+        y_diff = round(
+                100 * (self.position.y - avg_y) / self.position.y,
+                1)
+        if x_diff != 0 or y_diff != 0:
+            print("x: {}% y: {}%".format(x_diff, y_diff))
 
-        print("x: {}% y: {}%".format(
-            round(
-                100 * (self.real_position[0] - avg_x) / self.real_position[0],
-                1),
-            round(
-                100 * (self.real_position[1] - avg_y) / self.real_position[1],
-                1)))
-
-    def run(self):
-        # TODO: Check our interface is setupt and the simulator is running
+    def tick(self, t):
+        # Check our interface is setupt and the simulator is running
+        if self.interface is None:
+            raise Exception("Interface not set")
         # TODO: Now choose what we are going to do (eg send movement commands, calulate position etc)
+        self.seen_markers=self.camera.see()
+        self.process_seen_markers()
         pass
 
 
 if __name__ == "__main__":
-    sim = Simulator(CONFIG)
+    sim=Simulator(CONFIG)
+    sim.add_robot(RobotController(Vector2D(2500, 2500),
+                  Bearing(0), sim.interface, 0))
     sim.run()
-    plt.show()
+
+    # sim.animation.save("project.avi")
 
 # %%
