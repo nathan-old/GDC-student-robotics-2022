@@ -1,7 +1,9 @@
 from math import *
+from mimetypes import MimeTypes
+from pyexpat.errors import XML_ERROR_UNEXPECTED_STATE
 
 class Motors:
-    def __init__(self, w1_power=None, w2_power=None, w3_power=None, mtype=None, turn=None, rotation=None, speed=494.85, time=None):
+    def __init__(self, w1_power=None, w2_power=None, w3_power=None, mtype=None, turn=None, rotation=None, speed=494.85, time=None, x_pos = None, y_pos = None):
         self.w1_power = w1_power
         self.w2_power = w2_power
         self.w3_power = w3_power
@@ -10,7 +12,8 @@ class Motors:
         self.rotation = rotation
         self.speed = speed
         self.time = time
-        
+        self.x_pos = x_pos
+        self.y_pos = y_pos      
 motors = Motors()
 
 def input_to_output():
@@ -49,6 +52,14 @@ def movement_calc():
         motors.time = distance / motors.speed
         return motors.time, power, power, power
 
-print(input_to_output())
-print(input_to_output())
+def coordinates_calc():
+    if motors.mtype == "f" or motors.mtype == "b":
+        motors.x_pos += (motors.distance * sin(motors.rotation))
+        motors.y_pos += (motors.distance * cos(motors.rotation))
+    else:
+        motors.rotation += (motors.turn)
+        if motors.rotation > 360:
+            motors.rotation -= 360
+        elif motors.rotation < 0:
+            motors.rotation += 360
 
