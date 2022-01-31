@@ -1,17 +1,8 @@
 # %%
-from threading import Thread
-from tkinter import N
-from tkinter.messagebox import NO
 import matplotlib.pyplot as plt
-import matplotlib.patches as patches
 import matplotlib.animation as animation
-import multiprocessing as mp
-
-from pyrsistent import plist
-
-mp.set_start_method("fork")
 import time, matplotlib
-import cv2, math, random, functools, numpy as np
+import math, random, functools
 
 matplotlib.use('Agg')
 
@@ -328,6 +319,7 @@ def point_in_triangle(point, triangle):
     # All the signs must be positive or all negative
     return (side_1 < 0.0) == (side_2 < 0.0) == (side_3 < 0.0)
 
+
 def get_intersections(x0, y0, r0, x1, y1, r1):
     d = math.sqrt((x1 - x0)**2 + (y1 - y0)**2)
     if d > r0 + r1:
@@ -353,9 +345,11 @@ CONFIG = {
         'fov': 62,
         'range': 4000
     },
-    'fps': FPS,
-    'duration': DURATION,
-    'display_mode': 'live',
+    'render': {
+        'fps': FPS,
+        'duration': DURATION,
+        'display_mode': 'live',
+    },
     'markers_list': marker_list,
 }
 
@@ -385,9 +379,9 @@ class SimulatorCamera():
         y = self.robot.y
 
         endx = [
-            y + self.range *
+            x + self.range *
             math.cos(math.radians(self.robot.bearing.angle - self.fov / 2)),
-            y + self.range *
+            x + self.range *
             math.cos(math.radians(self.robot.bearing.angle + self.fov / 2))
         ]
 
@@ -568,7 +562,7 @@ class Bearing():
 
 class Simulator():
 
-    def __init__(self, config, fps, duration, display_mode='live'):
+    def __init__(self, config):
         self.config = config
         self.fps = config['render']['fps']
         self.duration = config['render']['duration']
@@ -583,7 +577,7 @@ class Simulator():
     @property
     def interface(self):
         return self._interface
-    
+
     def add_robot(self, robot, controlled=False):
         self.robots.append(robot)
         if controlled:
@@ -593,6 +587,7 @@ class Simulator():
             self.controlled_robot = robot
 
     def process_updates(self):
+        print("Proc updates")
         for update in self.updates:
             if update.command == 'move':
                 robot = self.robots[update.robot_id]
@@ -606,7 +601,7 @@ class Simulator():
             elif update.command == 'rotate':
                 self.robots[update.robot_id].set_bearing(
                     (self.robots[update.robot_id].bearing.angle +
-                    update.args[0]) % 360)
+                     update.args[0]) % 360)
             elif update.command == 'power':
                 self.robots[update.robot_id].set_power(update.args[0],
                                                        update.args[1])
@@ -744,13 +739,14 @@ class Simulator():
             self.render_lines()
             self.show_frame()
 
+
 class RobotController():
 
     def __init__(self, max_frame=100, camera_fov=62, camera_distance=4000):
         self.calculated_pos = [0, 0]
         self.calculated_points = []
         self.future_movement = []
-        self.seen_markers = [] # Stores the output of camera.see()
+        self.seen_markers = []  # Stores the output of camera.see()
 
     def move(self, amount, rot=0):
         speed = MAX_SPEED / FPS
@@ -821,9 +817,10 @@ class RobotController():
         # TODO: Now choose what we are going to do (eg send movement commands, calulate position etc)
         pass
 
-if __name__ == "main":
+
+if __name__ == "__main__":
     sim = Simulator(CONFIG)
     sim.run()
-
+    plt.show()
 
 # %%
