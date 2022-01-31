@@ -788,8 +788,8 @@ class Simulator():
         for robot in self.robots:
             points += [
                 Point(robot.x-robot.wheels_distance*math.cos(math.radians(robot.bearing.angle)), robot.y-robot.wheels_distance*math.sin(math.radians(robot.bearing.angle)), (int(((robot.motors[2] +1) / 2) * 255), int(((robot.motors[2] + 1) / 2) * 255), 0), Label("M3", pygame.Color('white'))),
-                Point(robot.x+robot.wheels_distance*math.cos(math.radians(robot.bearing.angle + 30)), robot.y+robot.wheels_distance*math.sin(math.radians(robot.bearing.angle + 30)), (int(((robot.motors[0] + 1) / 2) * 255), int(((robot.motors[0] + 1) / 2) * 255), 0), Label("M0", pygame.Color('white'))),
-                Point(robot.x+robot.wheels_distance*math.cos(math.radians(robot.bearing.angle - 30)), robot.y+robot.wheels_distance*math.sin(math.radians(robot.bearing.angle - 30)), (int(((robot.motors[1] + 1) / 2) * 255), int(((robot.motors[1] + 1) / 2) * 255), 0), Label("M1", pygame.Color('white'))),
+                Point(robot.x+robot.wheels_distance*math.cos(math.radians(robot.bearing.angle + 60)), robot.y+robot.wheels_distance*math.sin(math.radians(robot.bearing.angle + 60)), (int(((robot.motors[0] + 1) / 2) * 255), int(((robot.motors[0] + 1) / 2) * 255), 0), Label("M0", pygame.Color('white'))),
+                Point(robot.x+robot.wheels_distance*math.cos(math.radians(robot.bearing.angle - 60)), robot.y+robot.wheels_distance*math.sin(math.radians(robot.bearing.angle - 60)), (int(((robot.motors[1] + 1) / 2) * 255), int(((robot.motors[1] + 1) / 2) * 255), 0), Label("M1", pygame.Color('white'))),
             ]
 
             direction_x = robot.x + robot.camera.range / 2 * math.cos(
