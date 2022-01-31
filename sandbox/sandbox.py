@@ -879,14 +879,14 @@ class RobotController(RobotInterface):
         avg_y = sum(valid_points[1]) / len(valid_points[1])
         self.calculated_pos = [avg_x, avg_y]
         # print the percentage diffrence between the real position and the calculated position
-        x_diff = round(
-                100 * (self.position.x - avg_x) / self.position.x,
-                1)
-        y_diff = round(
-                100 * (self.position.y - avg_y) / self.position.y,
-                1)
-        if x_diff != 0 or y_diff != 0:
-            print("x: {}% y: {}%".format(x_diff, y_diff))
+        #x_diff = round(
+        #        100 * (self.position.x - avg_x) / self.position.x,
+        #        1)
+        #y_diff = round(
+        #        100 * (self.position.y - avg_y) / self.position.y,
+        #        1)
+        #if x_diff != 0 or y_diff != 0:
+        #    print("x: {}% y: {}%".format(x_diff, y_diff))
 
     def tick(self, t):
         # Check our interface is setupt and the simulator is running
@@ -895,7 +895,7 @@ class RobotController(RobotInterface):
         # TODO: Now choose what we are going to do (eg send movement commands, calulate position etc)
         self.seen_markers=self.camera.see()
         self.process_seen_markers()
-        self.interface.add_point(Point(self.calculated_pos[0], self.calculated_pos[1], pygame.Color('red'), Label(str(self.id), pygame.Color('white'))))
+        self.interface.add_point(Point(self.calculated_pos[0], self.calculated_pos[1], pygame.Color('cyan'), Label(str(self.id), pygame.Color('white'))))
         #for i in range(len(self.last_points)):
         #    print(self.last_points[i].position.x, self.last_points[i].position.y)
         #    self.interface.add_point(self.last_points[i])
