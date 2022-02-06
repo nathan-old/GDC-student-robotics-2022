@@ -5,4 +5,5 @@
 - Rulebook [ - Link](https://studentrobotics.org/docs/resources/2022/rulebook.html)
 - Omni-wheel spec sheets [ - Link](https://github.com/nathan-www/GDC-student-robotics/blob/d1014c058eb582f2aa40f7dec387b1245a79fe31/Docs/Omniwheel%20Specs.pdf)
 - Omni-wheel RS online page [ - Link](https://uk.rs-online.com/web/p/stem-motion-components/2097738)
+- large servo website [ -link](https://www.cmldistribution.co.uk/product/SAV-SC1257TG/savox-high-torque-coreless-digital-servo-10kg-6-0v)
 - The solution for everything [ - Link](https://stackoverflow.com/)
