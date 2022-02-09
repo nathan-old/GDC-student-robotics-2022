@@ -39,9 +39,6 @@ The different status codes:
 # TODO
 - Offset for camera to robot centre
 - Offset to grabber
-- Get camera library working
-- Create mapping
-- Include can locations
 - Get positional mapping working with distance tracking
 - Build can grabber
 - Build lifting arm
@@ -54,7 +51,7 @@ The different status codes:
 - Cut down mounting bolts
 - Notch mounting plates
 - Create spare part assemblies
-- Start switch/ button
+- Power switch/ button
 - Hard-coded movement instructions
 - Create return to home function
 - Motor hubs/ grub screws
@@ -62,8 +59,11 @@ The different status codes:
 - Improve looks of robot
 - Give robot a name
 - Add GDC Branding
-- RPM for different powers
 - Can recognition library 
 - Decision making system (which can to go for)
 - ~~Mark motor letters~~
 - ~~Maths for positional data~~
+- ~~RPM for different powers~~
+- ~~Get camera library working~~
+- ~~Create mapping~~
+- ~~Include can locations~~

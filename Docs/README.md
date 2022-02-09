@@ -7,3 +7,5 @@
 - Omni-wheel RS online page [ - Link](https://uk.rs-online.com/web/p/stem-motion-components/2097738)
 - large servo website [ -link](https://www.cmldistribution.co.uk/product/SAV-SC1257TG/savox-high-torque-coreless-digital-servo-10kg-6-0v)
 - The solution for everything [ - Link](https://stackoverflow.com/)
+- Astoria docs [ - link](https://srobo.github.io/astoria/index.html)
+- student robotics docs [ - link](https://github.com/orgs/srobo/repositories)
