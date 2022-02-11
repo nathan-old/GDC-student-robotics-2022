@@ -25,7 +25,7 @@ def get_intersections(x0, y0, r0, x1, y1, r1):
 
 # calculates the distance of the marker from the robot
 def calculate_distance(theta,psi,r, num):
-	h = (r*cos(radians(90-theta)))
+	h = (r*cos(radians(theta))) #90-theta
 	#z = (r*cos(radians(theta)))
 	#x = (h*cos(radians(90-psi)))
 	#y = (h*sin(radians(90-psi)))
@@ -47,9 +47,8 @@ marker_list = [[0,718.75,5750],[1,1437.5,5750],[2,2156.25,5750],[3,2875,5750],[4
 
 # inputs from robot camera in degrees and mm
 # list of markers seen by camera, in order theta, psi, r, marker number
-seen_markers = [[90,90-35.678,1231.1,8],[90,90,1000,9], [90,90+35.678,1231.1,10]]
-
-
+seen_markers = [[-0.0664386764864363, 6.909065636331171, 2000, 16], [-0.810876826732748, -16.131817089783926, 1858, 15]]
+#seen_markers = [[90,0,1000,0],[90,35.706691400602884725010135736866,1231.503781,1]]
 
 plt.rcParams["figure.figsize"] = (6,6)
 plt.xlim(0,5750)
@@ -102,6 +101,8 @@ circles = []
 for i in seen_markers:
 	point = calculate_distance(i[0],i[1],i[2], i[3])
 	circles.append([marker_list[i[3]][1],marker_list[i[3]][2],point])
+	print(i, point)
+
 	plt.gca().add_patch(patches.Circle((marker_list[i[3]][1],marker_list[i[3]][2]),point, fill = False, linestyle=':',color = 'C1'))
 
 valid_points = [[],[]]
@@ -116,9 +117,23 @@ for i in range(len(circles)):
 			valid_points[0].append(i[0])
 			valid_points[1].append(i[1])
 
+print(valid_points)
 avg_x = sum(valid_points[0]) / len(valid_points[0])
 avg_y = sum(valid_points[1]) / len(valid_points[1])
+sum_of = 0
+for i in seen_markers:
+	bearing = atan2(marker_list[i[3]][1]-avg_x,marker_list[i[3]][2]-avg_y)-radians(i[1])
+	if bearing < 0:
+		bearing+=radians(360)
+	elif bearing >360:
+		bearing -= radians(360)
+	print(degrees(bearing))
+	sum_of += bearing
+print(degrees(sum_of/2))
+
+
 plt.scatter(avg_x,avg_y, color = 'C3')# location
 plt.axis("off")
 
 plt.savefig(fname = 'figure.png', dpi = 300, transparent = True)
+#plt.show()
