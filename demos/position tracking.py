@@ -120,15 +120,10 @@ for i in range(5):
 		#print(circles)
 		valid_points = [[],[]]
 		for i in range(len(circles)):
-			if len(circles) == 3:
-				if i + 1 != len(circles):
-					a = i+1
-				else:
-					a = 0
-			elif len(circles) == 2:
-				if i == len(circles):
-					pass
+			if i + 1 != len(circles):
 				a = i+1
+			else:
+				a = 0
 			points = get_intersections(circles[i][0],circles[i][1],circles[i][2], circles[a][0],circles[a][1],circles[a][2])
 			for i in points:
 				if 0<i[0]<5750 and 0<i[1]<5750:
