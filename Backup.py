@@ -49,8 +49,8 @@ for (dirpath, dirnames, filenames) in os.walk(comp):
     print(filenames)
     break
 print(folders)
-#while len(folders) > 15:
-#    shutil.rmtree(os.path.join(comp,folders[0]))
-#    folders.remove(folders[0])
+while len(folders) > 15:
+    shutil.rmtree(os.path.join(comp,folders[0]))
+    folders.remove(folders[0])
 
 
