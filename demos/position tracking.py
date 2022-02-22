@@ -15,12 +15,12 @@ circumfrence = 0.3299 # wheel circumference/ m
 motor_power = 0.4
 rpm = 4.6778*(motor_power**6) - 88.46*(motor_power**5) - 9.1788*(motor_power**4) + 82.827*(motor_power**3) + 5.6922*(motor_power**2) + 97.405*(motor_power)
 speed = circumfrence * (rpm/60) # speed of the motors at power = 0.5/ m/s
-fov = 62
+fov = 47.5
 print('Running with an rpm of ' + str(rpm) + 'rpm and a power of '+str(motor_power))
 # list of marker positions
 marker_list = [[0,718.75,5750],[1,1437.5,5750],[2,2156.25,5750],[3,2875,5750],[4,3593.75,5750],[5,4312.5,5750],[6,5031.25,5750],[7,5750,5031.25],[8,5750,4312.5],[9,5750,3593.75],[10,5750,2875],[11,5750,2156.25],[12,5750,1437.5],[13,5750,718.75],[14,5031.25,0],[15,4312.5,0],[16,3593.75,0],[17,2875,0],[18,2156.25,0],[19,1437.5,0],[20,718.75,0],[21,0,718.75],[22,0,1437.5],[23,0,2156.25],[24,0,2875],[25,0,3593.75],[26,0,4312.5],[27,0,5031.25]]
 
-reverse_what_distance = 200
+move_what_distance = -200
 turn_what_angle = 10
 def x_and_y(bearing, distance):
     if 0<bearing<90:
@@ -38,11 +38,12 @@ def x_and_y(bearing, distance):
     return x,y
 def rotate(angle):
 	negative = 1
+	original = angle
 	if angle < 0:
 		angle *= -1
 		negative = -1
 	distance = angle * ((math.pi * 2 * arm_radius) / 360)
-	print('Turning ' + str(round(angle,3)) + ' degrees')
+	print('Turning ' + str(round(original,3)) + ' degrees')
 	time_ = float(distance / speed)
 	for wheel in wheels:
 		wheel.power = motor_power*negative
@@ -50,12 +51,17 @@ def rotate(angle):
 	for wheel in wheels:
 		wheel.power = BRAKE
 
-def reverse(x_distance):
+def forwards(x_distance):
+	negative = 1
+	original = x_distance
+	if x_distance < 0:
+		x_distance *= -1
+		negative = -1
 	distance = (x_distance/1000)/math.cos(math.radians(30))
-	print('Moving '+str(x_distance)+' meters backwards')
+	print('Moving '+str(original)+' meters backwards')
 	time_ = float(distance / speed)
-	wheels[0].power = motor_power
-	wheels[1].power = motor_power*-1
+	wheels[0].power = motor_power*negative
+	wheels[1].power = motor_power*-1*negative
 	time.sleep(time_)
 	wheels[0].power = BRAKE
 	wheels[1].power = BRAKE
@@ -113,7 +119,7 @@ def get_markers(index):
 			if rotation == 360:
 				rotation = 0
 				print('reached full turn, moving back')
-				reverse(reverse_what_distance)
+				forwards(move_what_distance)
 	types="A"
 	x = threading.Thread(target=save_pic, args=(frame,index,types,))
 	x.start()
@@ -168,17 +174,20 @@ for index in range(30):
 	if len(valid_points[0]) > 1:
 		avg_x = sum(valid_points[0]) / len(valid_points[0])
 		avg_y = sum(valid_points[1]) / len(valid_points[1])
-		sum_of = 0
+		bearing_array = []
 		for i in seen_markers:
 			bearing = math.atan2(marker_list[i[3]][1]-avg_x,marker_list[i[3]][2]-avg_y)-math.radians(i[1])
-			if bearing < 0:
+			if bearing < math.radians(0):
 				bearing+=math.radians(360)
-			elif bearing >360:
+			elif bearing >math.radians(360):
 				bearing -= math.radians(360)
-			sum_of += bearing
-			
-		bearing = (math.degrees(sum_of/len(seen_markers)))
-		data_array.append([index,[avg_x,avg_y],bearing, marker_ids])
+			bearing_array.append(bearing)
+		x, y = 0, 0
+		for i in bearing_array:
+			x += math.cos(i)
+			y += math.sin(i)
+		bearing = math.degrees(math.atan2(y, x))
+		data_array.append([index,[avg_x,avg_y],bearing,	 marker_ids])
 		print('-------------------------------------------------------------------------')
 		print('Viewing markers: ', end = '')
 		for i in marker_ids:
@@ -187,18 +196,22 @@ for index in range(30):
 		print('-------------------------------------------------------------------------')
 	else:
 		print('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
-		print('no valid intersections - this should not run')
+		print('no valid intersections - this should not run - are markers in the correct locations')
 		print('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
-rotate(bearing-90)
-print('finished in '+str(datetime.timedelta(seconds=(time.time()-start_time)))+' Seconds')
+	face_what_bearing = 0
+	turn = (bearing-face_what_bearing)*-1
+	if turn > 1 or turn < -1:
+		rotate(turn)
+	else:
+		print('within 1 degree')
 
+print('finished in '+str(datetime.timedelta(seconds=(time.time()-start_time)))+' Seconds')
+R.power_board.piezo.buzz(3, 400)
 start_time = time.time()
 print('saving plots...')
 for i in data_array:
 	print(data_array.index(i))
 	plot(i[0],i[1],i[2], i[3])
-	#x = threading.Thread(target=plot, args=(i[0],i[1],))
-	#x.start()
 print('Done!')
 print('finished in '+str(datetime.timedelta(seconds=(time.time()-start_time)))+' Seconds')
 R.power_board.piezo.buzz(0.2, 400)
