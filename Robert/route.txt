@@ -1,0 +1,12 @@
+forwards, 0.5
+turn, 90
+beep, 0.5
+forwards, 0.5
+turn, 90
+beep, 0.5
+forwards, 0.5
+turn, 90
+beep, 0.5
+forwards, 0.5
+turn, 90
+beep, 0.5
