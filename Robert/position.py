@@ -1,4 +1,4 @@
-import math, time
+import math
 
 # constants
 marker_list = [[0,718.75,5750],[1,1437.5,5750],[2,2156.25,5750],[3,2875,5750],[4,3593.75,5750],[5,4312.5,5750],[6,5031.25,5750],[7,5750,5031.25],[8,5750,4312.5],[9,5750,3593.75],[10,5750,2875],[11,5750,2156.25],[12,5750,1437.5],[13,5750,718.75],[14,5031.25,0],[15,4312.5,0],[16,3593.75,0],[17,2875,0],[18,2156.25,0],[19,1437.5,0],[20,718.75,0],[21,0,718.75],[22,0,1437.5],[23,0,2156.25],[24,0,2875],[25,0,3593.75],[26,0,4312.5],[27,0,5031.25]]
@@ -70,8 +70,8 @@ def get_position(R):
 			elif bearing >math.radians(360):
 				bearing -= math.radians(360)
 			# array of necessary data in order: (coordinates array), bearing, the markers being viewed by the camera
-			data_array.append([[avg_x,avg_y],bearing, marker_ids])
-			return [[avg_x,avg_y],bearing, marker_ids]
+			data_array.append([[avg_x/1000,avg_y/1000],bearing, marker_ids])
+			return [[avg_x/1000,avg_y/1000],bearing, marker_ids]
 		else: 
 			return None
 	else:

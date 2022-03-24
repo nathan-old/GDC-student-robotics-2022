@@ -21,7 +21,7 @@ class MovementMaster():
 		time.sleep(self.time_to_move)
 		for wheel in self.motors:
 			wheel.power = BRAKE
-	def forwards(self, distance, power):
+	def forwards(self, distance, power, front_wheels = [0,1]):
 		'''function to move the robot forwards and backwards'''
 		self.negative = 1
 		if distance < 0 :
@@ -29,8 +29,8 @@ class MovementMaster():
 			distance *= -1
 		self.speed = self.circumference * ((4.6778*(power**6) - 88.46*(power**5) - 9.1788*(power**4) + 82.827*(power**3) + 5.6922*(power**2) + 97.405*(power))/60)
 		self.time_to_move = distance/self.speed
-		self.motors[0].power = power * -1 * self.negative
-		self.motors[1].power = power * self.negative
+		self.motors[front_wheels[0]].power = power * -1 * self.negative
+		self.motors[front_wheels[1]].power = power * self.negative
 		time.sleep(self.time_to_move)
 		self.motors[0].power = BRAKE
 		self.motors[1].power = BRAKE
