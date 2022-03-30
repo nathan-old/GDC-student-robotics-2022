@@ -1,4 +1,11 @@
-forwards, 3
+beep, 0.2
+sleep, 0.1
+beep, 0.2
+sleep, 0.1
+beep, 0.2
+sleep, 0.1
+beep, 0.2
+//, forwards, 3
 //, turn, 90
 //, beep, 0.5
 //, forwards, 0.5

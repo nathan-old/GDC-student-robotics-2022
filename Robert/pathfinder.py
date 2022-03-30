@@ -247,7 +247,7 @@ def PathFind(position, can_locations, obstacles):
 
 
 
-import time
+#import time
 #start = time.time()
 #data = (PathFind(position, can_locations, obstacles))
 #print(time.time()-start)
