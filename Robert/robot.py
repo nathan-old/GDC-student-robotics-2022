@@ -85,7 +85,7 @@ for i in route:
 		print('[WARN] Invalid instruction on line ' + str(route.index(i)+1) + ' -- skipping')
 		continue
 	if i[0] == 'forwards':
-		movement.forwards(float(i[1]), 0.3)
+		movement.forwards(float(i[1]))
 	elif i[0] == 'beep':
 		R.power_board.piezo.buzz(float(i[1]), Note.D6)
 	elif i[0] == 'turn':

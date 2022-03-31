@@ -2,7 +2,6 @@ import serial, serial.tools.list_ports
 
 
 
-
 class Arduino():
     def __inint__(self):
         self.serial_nums = ['7523031383335161C151']
