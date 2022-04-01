@@ -11,7 +11,7 @@ After powering on the robot, wait for either of the preboot audio status and the
 - Arduino: Contains the scripts for the Arduino
 - demos: Demonstration scripts that dont interface with any other robot code to prove consepts
 - Robot: original robot modules and code
-- 
+
 # TODO
 - Offset for camera to robot centre
 - Offset to grabber
@@ -30,8 +30,9 @@ After powering on the robot, wait for either of the preboot audio status and the
 - Can recognition library 
 - Decision making system (which can to go for)
 - Update all can locations, marker locations and location of centeral box
+- make PCB for grabber servos and limit switch
 
-
+# Done
 - ~~Build can grabber~~
 - ~~Build lifting arm~~
 - ~~Get positional mapping working with distance tracking~~

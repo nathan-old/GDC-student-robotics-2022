@@ -218,10 +218,6 @@ class convert_to_grid():
 	def convert(self, distance):
 		return int(distance/self.grid_distance)
 
-
-#position = [0.10,0.5]
-#can_locations = [[0.32,0.19],[0.91,0.94],[0.20,0.10],[2,0.90],[0.55,0.60],[0.99,3],[0.45,0.83],[0.21,0.32],[0.63,0.21],[1,1]]
-#obstacles = [[0.13,0.5],[0.13,0.6]]
 def PathFind(position, can_locations, obstacles):
 	'''
 	position: Robots current position
@@ -244,11 +240,3 @@ def PathFind(position, can_locations, obstacles):
 	for i in range(4):
 		locations.append(can_locations[distance.index(sorted(distance)[i])])
 	return convert_instructions(get_route(position, locations, obstacles))
-
-
-
-#import time
-#start = time.time()
-#data = (PathFind(position, can_locations, obstacles))
-#print(time.time()-start)
-#print(data)
