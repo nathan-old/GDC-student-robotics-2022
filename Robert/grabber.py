@@ -4,7 +4,7 @@ import serial, serial.tools.list_ports
 
 class Arduino():
     def __inint__(self):
-        self.serial_nums = ['7523031383335161C151']
+        self.serial_num = '7523031383335161C151'
         self.RUGGEDUINO_ID = None
         self.ser = None
     def Setup(self):
@@ -12,9 +12,8 @@ class Arduino():
         ports = serial.tools.list_ports.comports()
         for port, desc, hwid in sorted(ports):
             SER = hwid.split(' ')[2][4:]
-            for i in self.serial_nums:
-                if SER == i:
-                    self.RUGGEDUINO_ID = (SER)
+            if SER == '7523031383335161C151':
+                self.RUGGEDUINO_ID = (SER)
         return self.RUGGEDUINO_ID
     def Start(self, R, ID):
         '''Start Communications with the arduino
