@@ -15,22 +15,18 @@ After powering on the robot, wait for either of the preboot audio status and the
 # TODO
 - Offset for camera to robot centre
 - Offset to grabber
-- Code to use grabber
-- Battery enclosure
 - Flag mount
 - Cable management
-- Cut down mounting bolts
 - Create spare part assemblies
 - Hard-coded movement instructions
 - Create return to home function
 - Make USB's accessible for COMP mode + code USB stick
 - Improve looks of robot
 - Give robot a name
-- Add GDC Branding
 - Can recognition library 
 - Decision making system (which can to go for)
 - Update all can locations, marker locations and location of centeral box
-- make PCB for grabber servos and limit switch
+- Make robot do reliable and accurate distances/turns
 
 # Done
 - ~~Build can grabber~~
@@ -46,3 +42,8 @@ After powering on the robot, wait for either of the preboot audio status and the
 - ~~Get camera library working~~
 - ~~Create mapping~~
 - ~~Include can locations~~
+- ~~Cut down mounting bolts~~
+- ~~Battery enclosure~~
+- ~~Add GDC Branding~~
+- ~~make PCB for grabber servos and limit switch~~
+- ~~Code to use grabber~~
