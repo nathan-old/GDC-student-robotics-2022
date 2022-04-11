@@ -3,7 +3,9 @@
 Servo Grab;
 Servo Flip;
 
-const int buttonPin = 9;
+const int buttonPin = 13;
+const int FlipPin = 12;
+const int GrabPin = 11;
 int buttonState = 0;
 int Pos = 100;
 int PosGrab = 0;
@@ -11,14 +13,11 @@ int PosFlip = 0;
 
 void setup() {
   Serial.begin(9600);
-
-
-  
   pinMode(buttonPin, INPUT);
-  Flip.attach(8);
-  Grab.attach(7);
-//  Pos = calibrate();
-
+  Flip.attach(FlipPin);
+  Grab.attach(GrabPin);
+  Pos = calibrate();
+  Flip.write(7);
 }
 
 int calibrate() {
@@ -26,7 +25,7 @@ int calibrate() {
     Grab.write(PosGrab);
     buttonState = digitalRead(buttonPin);
     if  (buttonState == HIGH) {
-      Serial.println(PosGrab);
+      Serial.println("AAA");
       return (PosGrab);
       break;
     }
@@ -34,12 +33,26 @@ int calibrate() {
   }
 }
 
+void FlipCan(int startPoint, int endPoint, int stepSize) {
+  for (PosFlip = startPoint; PosFlip == endPoint; PosFlip -= stepSize) { 
+    Flip.write(PosFlip);
+    delay(15);
+  }
+}
+
 void GrabCan() {
   Grab.write(Pos+70);
-  Flip.write(180);
+  delay(200);
+  for (PosFlip = 7; PosFlip <= 180; PosFlip += 2) { 
+    Flip.write(PosFlip);
+    delay(10);
+  }
   Pos = calibrate();
-  Flip.write(0);
-    
+  Grab.write(Pos);
+  for (PosFlip = 180; PosFlip >= 7; PosFlip -= 2) { 
+    Flip.write(PosFlip);
+    delay(10);
+  }
 }
 
 void loop() {
