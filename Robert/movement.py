@@ -6,19 +6,21 @@ class MovementMaster():
 		''' Robot dimension constants'''
 		R = robot
 		self.arm_radius = 0.25
-		self.circumference = 0.3299
+		self.wheel_circumference = 0.3299
 		self.motors = [R.motor_boards['SR0PJ1W'].motors[0], R.motor_boards['SR0VG1M'].motors[0], R.motor_boards['SR0VG1M'].motors[1]]# m0 and m1 are front motors
-		self.intergrated_distance = 0.199569041087827
+		self.intergrated_distance_acceleration = 0.199569041087827
 		self.rps_constant = 1.54090799872
-		self.speed = self.circumference * self.rps_constant
+		self.speed = self.wheel_circumference * self.rps_constant
 
 	def rotate(self, angle, power):
 		''' function to turn the robot'''
+		print('Turning - ' + str(angle) + ' at power - ' + str(power))
+		angle /= 1.13
 		self.negative = 1
 		if angle < 0:
 			self.negative = -1
 			angle *= -1
-		self.speed = self.circumference * ((4.6778*(power**6) - 88.46*(power**5) - 9.1788*(power**4) + 82.827*(power**3) + 5.6922*(power**2) + 97.405*(power))/60)
+		self.speed = self.wheel_circumference * ((4.6778*(power**6) - 88.46*(power**5) - 9.1788*(power**4) + 82.827*(power**3) + 5.6922*(power**2) + 97.405*(power))/60)
 		self.distance = angle * ((math.pi * 2 * self.arm_radius) / 360)
 		self.time_to_move = self.distance/self.speed
 		for wheel in self.motors:
@@ -31,19 +33,28 @@ class MovementMaster():
 		'''function to move the robot forwards and backwards
 		Distance: the distance you wish to move the robot
 		front_wheels: the index of the wheels you wish to use (normally 0 and 1)'''
+		print('forwards - ' + str(distance))
+		distance *= 0.9293
 		self.negative = 1
 		if distance < 0 :
 			self.negative = -1
 			distance *= -1
-		if distance > self.intergrated_distance:
+		if distance > (self.intergrated_distance_acceleration):
 			distance = self.accelerate_forwards(distance, self.negative, front_wheels)
-		self.time_to_move = distance/self.speed
-		self.motors[front_wheels[0]].power = 0.8 * self.negative
-		self.motors[front_wheels[1]].power = 0.8 * -1 * self.negative
-		time.sleep(self.time_to_move)
-		self.motors[front_wheels[0]].power = BRAKE
-		self.motors[front_wheels[1]].power = BRAKE
-
+			self.time_to_move = distance/self.speed
+			self.motors[front_wheels[0]].power = 0.8 * self.negative
+			self.motors[front_wheels[1]].power = 0.8 * -1 * self.negative
+			time.sleep(self.time_to_move)
+			#self.decelerate_forwards(self.negative, front_wheels)
+			self.motors[front_wheels[0]].power = BRAKE
+			self.motors[front_wheels[1]].power = BRAKE
+		else:
+			self.time_to_move = distance/(self.wheel_circumference * 0.528070517)
+			self.motors[front_wheels[0]].power = 0.3 * self.negative
+			self.motors[front_wheels[1]].power = 0.3 * -1 * self.negative
+			time.sleep(self.time_to_move)
+			self.motors[front_wheels[0]].power = BRAKE
+			self.motors[front_wheels[1]].power = BRAKE
 
 	def accelerate_forwards(self, distance, negative, front_wheels):
 		''' The function to make the motors accelerate the robot
@@ -55,8 +66,6 @@ class MovementMaster():
 		time_per_step = time_to_accelerate/num_of_changes
 
 		for i in range(1, num_of_changes+1, 2):
-			print('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
-			print(i, i+1)
 			self.motors[front_wheels[0]].power = (0.8/num_of_changes)*i* negative
 			self.motors[front_wheels[1]].power = (0.8/num_of_changes)*i* -1 * negative
 			time.sleep(time_per_step)
@@ -64,4 +73,21 @@ class MovementMaster():
 			self.motors[front_wheels[0]].power = ((0.8/num_of_changes)*(i+1) * negative)
 			time.sleep(time_per_step)
 
-		return distance-self.intergrated_distance
+		return distance- self.intergrated_distance_acceleration
+
+	#def decelerate_forwards(self, negative, front_wheels):
+	#	'''Deceleration function to slow down without over current
+	#	negative: if direction is negative it will be -1, forwards 1
+	#	front_wheels: the index of the wheels you wish to use (normally 0 and 1)'''
+	#   self.intergrated_distance_deceleration = 0.1743475436843502 # move this to the __init__()
+	#	num_of_changes = 6
+	#	time_to_decelerate = 0.75
+	#	time_per_step = time_to_decelerate/num_of_changes
+	#	steps = [0.8, 0.6, 0.4]
+	#	for i in steps:
+	#		self.motors[front_wheels[0]].power = i* negative
+	#		self.motors[front_wheels[1]].power = i* -1 * negative
+	#		time.sleep(time_per_step)
+	#		self.motors[front_wheels[1]].power = (i-0.1) * -1 * negative
+	#		self.motors[front_wheels[0]].power = (i-0.1) * negative
+	#		time.sleep(time_per_step)

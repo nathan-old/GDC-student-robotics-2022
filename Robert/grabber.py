@@ -1,4 +1,4 @@
-import serial, serial.tools.list_ports
+import serial, serial.tools.list_ports, time
 
 
 
@@ -39,3 +39,4 @@ class Communicate():
     def Grab(self):
         '''Sends the grab command to the arduino'''
         self.ser.write(b'A')
+        time.sleep(4)

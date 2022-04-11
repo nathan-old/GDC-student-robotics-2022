@@ -2,18 +2,19 @@ from sr.robot3 import *
 import time, pathfinder
 from movement import MovementMaster
 from grabber import Arduino, Communicate
-from position import PositionFinder
+from position_new import Position
+import os
 
-
-RobotInfo_Enable = True
-Arduino_Enable = False
-Instructions_Enable = True
+RobotInfo_Enable = False
+Arduino_Enable = True
+Instructions_Enable = False
 ServoBoard_Enable = False
 
 PathFinder_Enable = False
 Grabber_Enable = False
-PositionFinder_Enable = False
-RouteMovement_Enable = True
+PositionFinder_Enable = True
+RouteMovement_Enable = False
+
 
 
 
@@ -27,7 +28,7 @@ else:
 	R = Robot(auto_start=True,verbose=True)
 
 
-position_finder = PositionFinder(R)
+position_finder = Position(R)
 movement = MovementMaster(R)
 
 
@@ -37,14 +38,8 @@ if ServoBoard_Enable:
 
 
 if RobotInfo_Enable:
-	print('Starting...\n[INFO] Starting Zone ' + str(R.zone) + '\n[INFO] Arena ' + str(R.arena) + '\n[INFO] Mode ' + str(R.mode)+'\n[INFO] Robot arm radius is ' + str(movement.arm_radius)+'\n[INFO] Wheel circumference is '+str(movement.circumference))
+	print('Starting...\n[INFO] Starting Zone ' + str(R.zone) + '\n[INFO] Arena ' + str(R.arena) + '\n[INFO] Mode ' + str(R.mode)+'\n[INFO] Robot arm radius is ' + str(movement.arm_radius)+'\n[INFO] Wheel circumference is '+str(movement.wheel_circumference))
 
-
-if Grabber_Enable:
-	for i in range(2):
-		com.Grab()
-		print('Grab')
-		time.sleep(2)
 
 
 if Instructions_Enable:
@@ -66,7 +61,7 @@ obstacles = []
 #R.servo_board.servos[1].position = 0.2
 def pos_get():
 	try:
-		position = position_finder(R).run()
+		position = position_finder.try_untill_find()
 		if position != None:
 			print('[INFO] You are in position ('+str(position[0][0])+','+str(position[0][1])+') at an angle of '+str(position[1]))
 			return position
@@ -79,70 +74,73 @@ def pos_get():
 		print(error)
 		print('-----------------------------------------------------------------------------------------')
 		return None
-
+for i in range(4):
+	R.camera.save(os.path.join(R.usbkey, "initial-view" + str(i) + ".png"))
 print('Finished booting press start')
 '''Start button pressed run code below after start'''
-R.wait_start() 
+while True:
+	R.wait_start() 
+
+	if PathFinder_Enable:
+		for i in range(3):
+			position = pos_get()
+			if position != None:
+				bearing = position[1]
+				tolerance = 5
+				if 90- tolerance > bearing or bearing > 90 + tolerance:
+					movement.rotate(float(bearing-90), 0.3)
+			else:
+				print('[WARN] cannot find valid pos ')
+				position = pos_get()
+				for i in range(4):
+					if position == None:
+						movement.rotate(10, 0.3)
+						print('[WARN] cannot find position -- attempt ' + str(i))
+						position = pos_get()
 
 
-
-if Grabber_Enable:
-	for i in range(5):
-			com.Grab()
-			time.sleep(2)
-
-
-if PathFinder_Enable:
-	for i in range(3):
 		position = pos_get()
+		for i in range(4):
+			if position == None:
+				print('[WARN] cannot find position -- attempt ' + str(i))
+				position = pos_get()
 		if position != None:
-			bearing = position[1]
-			tolerance = 5
-			if 90- tolerance > bearing or bearing > 90 + tolerance:
-				movement.rotate(float(bearing-90), 0.3)
+			position = position[0]
+			route = pathfinder.PathFind(position,can_locations, obstacles)
 		else:
-			print('[WARN] cannot find valid pos ')
-			position = pos_get()
-			for i in range(4):
-				if position == None:
-					movement.rotate(10, 0.3)
-					print('[WARN] cannot find position -- attempt ' + str(i))
-					position = pos_get()
-
-
-	position = pos_get()
-	for i in range(4):
-		if position == None:
-			print('[WARN] cannot find position -- attempt ' + str(i))
-			position = pos_get()
-	if position != None:
-		position = position[0]
-		route = pathfinder.PathFind(position,can_locations, obstacles)
-	else:
-		print('[WARN] cannot get pathfinding to work - insufficient data')
+			print('[WARN] cannot get pathfinding to work - insufficient data')
 
 
 
-if PositionFinder_Enable:
-	print(pos_get())
+	if PositionFinder_Enable:
+		pos_get()
 
 
-if RouteMovement_Enable:
-	for i in route:
-		if len(i) < 2:
-			print('[WARN] Invalid instruction on line ' + str(route.index(i)+1) + ' -- skipping')
-			continue
-		if i[0] == 'forwards':
-			movement.forwards(float(i[1]), [2,0])
-		elif i[0] == 'beep':
-			R.power_board.piezo.buzz(float(i[1]), Note.D6)
-		elif i[0] == 'turn':
-			movement.rotate(float(i[1]), 0.3)
-		elif i[0] == 'sleep':
-			time.sleep(float(i[1]))
-		elif i[0]=='//':
-			print('[WARN] Commented instruction on line ' + str(route.index(i)+1) + ' -- skipping')
-	time.sleep(1)
-	for i in range(3):
-		R.power_board.piezo.buzz(0.5, Note.D6)
-		time.sleep(1)
+	if RouteMovement_Enable:
+		for i in route:
+			if len(i) < 2:
+				print('[WARN] Invalid instruction on line ' + str(route.index(i)+1) + ' -- skipping')
+				continue
+			if i[0] == 'forwards':
+				if len(i) == 3:
+					if i[2] == 'Plough\n':
+						front = [2, 0]
+					elif i[2] == 'Empty\n':
+						front = [1, 2]
+					else:
+						front = [0,1]
+				else:
+					front = [0,1]
+				movement.forwards(float(i[1]), front)# [2,0]
+			elif i[0] == 'beep':
+				R.power_board.piezo.buzz(float(i[1]), Note.D6)
+			elif i[0] == 'turn':
+				movement.rotate(float(i[1]), 0.4)
+			elif i[0] == 'sleep':
+				time.sleep(float(i[1]))
+			elif i[0] == 'grab' and Grabber_Enable:
+				com.Grab()
+			elif i[0]=='//':
+				print('[WARN] Commented instruction on line ' + str(route.index(i)+1) + ' -- skipping')
+			#R.wait_start()
+	os.system("sync")
