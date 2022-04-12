@@ -2,18 +2,18 @@ from sr.robot3 import *
 import time, pathfinder
 from movement import MovementMaster
 from grabber import Arduino, Communicate
-from position_new import Position
-import os
+from position import Position
 
-RobotInfo_Enable = False
+RobotInfo_Enable = True
 Arduino_Enable = True
-Instructions_Enable = False
-ServoBoard_Enable = False
+Instructions_Enable = True
+ServoBoard_Enable = True
+StartCameraEnable = False
 
 PathFinder_Enable = False
-Grabber_Enable = False
-PositionFinder_Enable = True
-RouteMovement_Enable = False
+Grabber_Enable = True
+PositionFinder_Enable = False
+RouteMovement_Enable = True
 
 
 
@@ -30,7 +30,6 @@ else:
 
 position_finder = Position(R)
 movement = MovementMaster(R)
-
 
 if ServoBoard_Enable:
 	R.servo_board.servos[0].position = 0
@@ -51,7 +50,8 @@ if Instructions_Enable:
 else:
 	route = []
 
-
+if StartCameraEnable:
+	R.camera.see()
 
 ''' locations of all relevant things such as cans and the centeral platform '''
 can_locations = [[2.875, 0.0335], [2.875, 1.14], [2.475, 1.875], [1.625, 1.625], [3.28, 1.875], [1.875, 2.475], [1.875, 3.28], [1.14, 2.875], [0.0335, 2.875], [2.875, 5.7165], [2.875, 4.61], [3.275, 3.875], [4.125, 4.125], [2.47, 3.875], [3.875, 3.275], [3.875, 2.47], [4.61, 2.875], [5.7165, 2.875], [4.125, 1.625], [1.625, 4.125], [2.3, 2.575], [2.575, 2.3], [3.45, 2.575], [3.175, 2.3], [3.45, 3.175], [3.175, 3.45], [2.3, 3.175], [2.575, 3.45]]
@@ -63,7 +63,7 @@ def pos_get():
 	try:
 		position = position_finder.try_untill_find()
 		if position != None:
-			print('[INFO] You are in position ('+str(position[0][0])+','+str(position[0][1])+') at an angle of '+str(position[1]))
+			print('[INFO] You are in position ('+str(round(position[0][0],2))+','+str(round(position[0][1],2))+') at an angle of '+str(round(position[1],2)))
 			return position
 		else:
 			print('[WARN] Cannot find a position')
@@ -74,8 +74,6 @@ def pos_get():
 		print(error)
 		print('-----------------------------------------------------------------------------------------')
 		return None
-for i in range(4):
-	R.camera.save(os.path.join(R.usbkey, "initial-view" + str(i) + ".png"))
 print('Finished booting press start')
 '''Start button pressed run code below after start'''
 while True:
@@ -115,17 +113,17 @@ while True:
 	if PositionFinder_Enable:
 		pos_get()
 
-
 	if RouteMovement_Enable:
+		print('route')
 		for i in route:
 			if len(i) < 2:
 				print('[WARN] Invalid instruction on line ' + str(route.index(i)+1) + ' -- skipping')
 				continue
 			if i[0] == 'forwards':
 				if len(i) == 3:
-					if i[2] == 'Plough\n':
+					if i[2] == 'Plough\n' or i[2] == 'Plough':
 						front = [2, 0]
-					elif i[2] == 'Empty\n':
+					elif i[2] == 'Empty\n' or i[2] == 'Empty':
 						front = [1, 2]
 					else:
 						front = [0,1]
@@ -140,7 +138,7 @@ while True:
 				time.sleep(float(i[1]))
 			elif i[0] == 'grab' and Grabber_Enable:
 				com.Grab()
+			elif i[0] == 'sideways':
+				movement.sideways(float(i[1]))
 			elif i[0]=='//':
 				print('[WARN] Commented instruction on line ' + str(route.index(i)+1) + ' -- skipping')
-			#R.wait_start()
-	os.system("sync")

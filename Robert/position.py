@@ -1,4 +1,4 @@
-import math
+import math, time
 from movement import MovementMaster
 
 
@@ -9,7 +9,7 @@ class Position():
 		self.marker_list = [[0,718.75,5750],[1,1437.5,5750],[2,2156.25,5750],[3,2875,5750],[4,3593.75,5750],[5,4312.5,5750],[6,5031.25,5750],[7,5750,5031.25],[8,5750,4312.5],[9,5750,3593.75],[10,5750,2875],[11,5750,2156.25],[12,5750,1437.5],[13,5750,718.75],[14,5031.25,0],[15,4312.5,0],[16,3593.75,0],[17,2875,0],[18,2156.25,0],[19,1437.5,0],[20,718.75,0],[21,0,718.75],[22,0,1437.5],[23,0,2156.25],[24,0,2875],[25,0,3593.75],[26,0,4312.5],[27,0,5031.25]]
 		self.data_array = []
 		self.turn_angle = 10
-		print('INITIALISED')
+		print('[INITIALISED] Position fonder initialised')
 	def get_intersections(self, x0, y0, r0, x1, y1, r1):
 		''' returns all locations circles will intersect'''
 		d=math.sqrt((x1-x0)**2 + (y1-y0)**2)
@@ -26,6 +26,8 @@ class Position():
 			y4=y2+h*(x1-x0)/d
 			return ([[x3, y3], [x4, y4]])
 	def get_pos(self):
+		'''Returns either None or an array of location data (if a valid location is found) 
+		array of necessary data in order: (coordinates array[x,y]), bearing, the markers being viewed by the camera'''
 		seen_markers = []
 		markers_input = self.R.camera.see()
 		for marker in markers_input:
@@ -69,7 +71,6 @@ class Position():
 				elif bearing >360:
 					bearing -= 360
 				# array of necessary data in order: (coordinates array), bearing, the markers being viewed by the camera
-				#print('Your position is (' + str(avg_x/1000) + ',' + str(avg_y/1000) + ') at a bearing of ' + str(bearing))
 				self.data_array.append([[avg_x/1000,avg_y/1000],bearing, marker_ids])
 				return [[avg_x/1000,avg_y/1000],bearing, marker_ids]
 			else: 
@@ -78,15 +79,16 @@ class Position():
 			return None
 
 	def try_untill_find(self):
-		'''Try untill find'''
+		'''Try to find a valid location untill one is found'''
 		position = self.get_pos()
 		rotation = 0
 		while position == None:
 			if rotation == 360:
-				break
+				print('One Full Turn')
+				self.movement.forwards(-0.2)
+				rotation = 0
 			position = self.get_pos()
 			rotation += self.turn_angle
 			self.movement.rotate(self.turn_angle, 0.3)
-		if rotation != 0:
-			self.movement.rotate((rotation*-1), 0.3)
+			time.sleep(0.5)
 		return position

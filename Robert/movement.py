@@ -11,6 +11,7 @@ class MovementMaster():
 		self.intergrated_distance_acceleration = 0.199569041087827
 		self.rps_constant = 1.54090799872
 		self.speed = self.wheel_circumference * self.rps_constant
+		self.negative = 1
 
 	def rotate(self, angle, power):
 		''' function to turn the robot'''
@@ -28,6 +29,24 @@ class MovementMaster():
 		time.sleep(self.time_to_move)
 		for wheel in self.motors:
 			wheel.power = BRAKE
+		
+	def sideways(self, distance):
+		print('sideways - ' + str(distance))
+		distance /= 0.966982143
+		self.negative = 1
+		if distance < 0 :
+			self.negative = -1
+			distance *= -1
+		power = 0.63
+		self.speed = self.wheel_circumference * ((4.6778*(power**6) - 88.46*(power**5) - 9.1788*(power**4) + 82.827*(power**3) + 5.6922*(power**2) + 97.405*(power))/60)
+		self.time_to_move = distance/self.speed
+		self.motors[2].power = power * self.negative
+		self.motors[1].power = -0.35 * self.negative
+		self.motors[0].power = -0.35 * self.negative
+		time.sleep(self.time_to_move)
+		for wheel in self.motors:
+			wheel.power = BRAKE
+
 
 	def forwards(self, distance, front_wheels = [0,1]):
 		'''function to move the robot forwards and backwards

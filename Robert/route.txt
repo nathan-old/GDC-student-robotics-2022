@@ -1,5 +1,7 @@
+forwards, 1, Plough
+sleep, 1
+turn, 120
+forwards, -1, Grab
 turn, 360
-turn, 720
-turn, 1080
-turn, 1440
-turn, 1800
+grab, 0
+sideways, 0.5
