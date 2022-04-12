@@ -1,5 +1,5 @@
-#How to write robot routes
-The robot can run off of a text file (route.txt) which is found in the robot.zip file. It is made up off the following commands:
+#Writing routes
+The robot can run off of a text file (route.txt) which is found in the robot.zip file. It is made up off the following commands.
 # Forwards
 ```forwards, DISTANCE, SIDE``` 
 - DISTANCE: the (float) distance you want the robot to go in metres. Negative for reverse.
