@@ -1,7 +1,7 @@
 forwards, 1, Plough
 sleep, 1
 turn, 120
-forwards, -1, Grab
+forwards, -1, Grabber
 turn, 360
 grab, 0
 sideways, 0.5
