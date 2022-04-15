@@ -7,6 +7,7 @@ class Arduino():
         self.serial_num = '7523031383335161C151'
         self.RUGGEDUINO_ID = None
         self.ser = None
+        print('[INITI] Arduino setup initialised')
     def Setup(self):
         '''The tools to initialise the Ruggeduino for comunications'''
         ports = serial.tools.list_ports.comports()
@@ -28,11 +29,12 @@ class Arduino():
 
 class Communicate():
     def __init__(self, serial):
+        print('[INITI] Arduino communications initialised')
         self.ser = serial
     def Write(self, String):
         '''Write to the serial port of the setup arduino
         String: The string data you wish to send'''
-        self.ser.write(String.encode())
+        self.ser.write(String.encode("utf-8"))
     def Read(self):
         '''Read from the serial port of the setup arduino'''
         return self.ser.readline()

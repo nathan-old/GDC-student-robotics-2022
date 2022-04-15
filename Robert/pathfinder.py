@@ -121,6 +121,7 @@ def get_route(start, cans, obstacles):
 	obstacles: any grid locations that are blocked
 	Function to return the best route to take'''
 	for i in cans:
+		print('can - '+str(i))
 		grid = make_grid(Spot(1,1).width)
 		start_square = grid[start[0]][start[1]]
 		for x in cans:
@@ -142,6 +143,8 @@ def get_route(start, cans, obstacles):
 
 			smallest = len(route.routes[i])
 			index = i
+	print(route.routes[index])
+	print(str(i)+ ' steps')
 	return route.routes[index]
 
 
