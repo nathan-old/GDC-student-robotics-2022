@@ -19,20 +19,20 @@ class RunRoute():
     def route_file_to_array(self):
         with open(self.route_file,'r') as route_data:
             self.route = route_data.readlines()
-		    for i in range(len(route)):
-			    self.route[i] = route[i].split(', ')
-	    route_data.close()
+            for i in range(len(self.route)):
+                self.route[i] = self.route[i].split(', ')
+        route_data.close()
     def start_zone_to_coords(self):
-        if self.start_zone = 0:
+        if self.start_zone == 0:
             self.coords = [0.5,5.25]
-        elif self.start_zone = 1:
+        elif self.start_zone == 1:
             self.coords = [5.25,5.25]
-        elif self.start_zone = 2:
+        elif self.start_zone == 2:
             self.coords = [5.25,0.5]
         else:
             self.coords = [0.5,0.5]
 
-    def follow_instructions:
+    def follow_instructions(self):
         for i in range(self.route):
             if i[0] == 'forwards':
                 x = math.sin(math.radians(self.angle))*i[1]
