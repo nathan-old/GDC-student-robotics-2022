@@ -1,7 +1,23 @@
 forwards, 1, Plough
+sideways, 1, Plough
+forwards, -1, Plough
+sideways, -1, Plough
+turn, 90
+grab, 
+forwards, 1
+beep, 0.2
 sleep, 1
+<<<<<<< HEAD
 turn, 120
 forwards, -1, Grabber
 turn, 360
 grab, 0
 sideways, 0.5
+=======
+beep, 0.2
+//, forwards, 0.5, Plough
+//, forwards, -0.2, Plough
+//, turn, -120
+//, forwards, 0.2, Grab
+//, grab, 0
+>>>>>>> e437153894455af054fc8fd9a17cf68f78f204b5

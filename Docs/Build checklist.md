@@ -33,4 +33,4 @@ The checklist of things that need to be pluged into each thing.
 
 # Arduino
 - USB cable
-- everything else
+- headders

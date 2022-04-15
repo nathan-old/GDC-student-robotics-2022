@@ -4,6 +4,7 @@ from sr.robot3 import *
 class MovementMaster():
 	def __init__(self, robot):
 		''' Robot dimension constants'''
+		print('[INITI] Movement Master initialised')
 		R = robot
 		self.arm_radius = 0.25
 		self.wheel_circumference = 0.3299
@@ -11,39 +12,37 @@ class MovementMaster():
 		self.intergrated_distance_acceleration = 0.199569041087827
 		self.rps_constant = 1.54090799872
 		self.speed = self.wheel_circumference * self.rps_constant
-		self.negative = 1
 
 	def rotate(self, angle, power):
 		''' function to turn the robot'''
 		print('Turning - ' + str(angle) + ' at power - ' + str(power))
 		angle /= 1.13
-		self.negative = 1
+		negative = 1
 		if angle < 0:
-			self.negative = -1
+			negative = -1
 			angle *= -1
-		self.speed = self.wheel_circumference * ((4.6778*(power**6) - 88.46*(power**5) - 9.1788*(power**4) + 82.827*(power**3) + 5.6922*(power**2) + 97.405*(power))/60)
-		self.distance = angle * ((math.pi * 2 * self.arm_radius) / 360)
-		self.time_to_move = self.distance/self.speed
+		speed = self.wheel_circumference * ((4.6778*(power**6) - 88.46*(power**5) - 9.1788*(power**4) + 82.827*(power**3) + 5.6922*(power**2) + 97.405*(power))/60)
+		time_to_move = (angle * ((math.pi * 2 * self.arm_radius) / 360))/speed
 		for wheel in self.motors:
-			wheel.power = power*self.negative
-		time.sleep(self.time_to_move)
+			wheel.power = power*negative
+		time.sleep(time_to_move)
 		for wheel in self.motors:
 			wheel.power = BRAKE
 		
-	def sideways(self, distance):
+	def sideways(self, distance, front_wheels = [2,1,0]):
 		print('sideways - ' + str(distance))
 		distance /= 0.966982143
-		self.negative = 1
+		negative = 1
 		if distance < 0 :
-			self.negative = -1
+			negative = -1
 			distance *= -1
 		power = 0.63
-		self.speed = self.wheel_circumference * ((4.6778*(power**6) - 88.46*(power**5) - 9.1788*(power**4) + 82.827*(power**3) + 5.6922*(power**2) + 97.405*(power))/60)
-		self.time_to_move = distance/self.speed
-		self.motors[2].power = power * self.negative
-		self.motors[1].power = -0.35 * self.negative
-		self.motors[0].power = -0.35 * self.negative
-		time.sleep(self.time_to_move)
+		speed = self.wheel_circumference * ((4.6778*(power**6) - 88.46*(power**5) - 9.1788*(power**4) + 82.827*(power**3) + 5.6922*(power**2) + 97.405*(power))/60)
+		time_to_move = distance/speed
+		self.motors[front_wheels[0]].power = power * negative
+		self.motors[front_wheels[1]].power = -0.35 * negative
+		self.motors[front_wheels[2]].power = -0.35 * negative
+		time.sleep(time_to_move)
 		for wheel in self.motors:
 			wheel.power = BRAKE
 
@@ -60,18 +59,18 @@ class MovementMaster():
 			distance *= -1
 		if distance > (self.intergrated_distance_acceleration):
 			distance = self.accelerate_forwards(distance, self.negative, front_wheels)
-			self.time_to_move = distance/self.speed
+			time_to_move = distance/self.speed
 			self.motors[front_wheels[0]].power = 0.8 * self.negative
 			self.motors[front_wheels[1]].power = 0.8 * -1 * self.negative
-			time.sleep(self.time_to_move)
+			time.sleep(time_to_move)
 			#self.decelerate_forwards(self.negative, front_wheels)
 			self.motors[front_wheels[0]].power = BRAKE
 			self.motors[front_wheels[1]].power = BRAKE
 		else:
-			self.time_to_move = distance/(self.wheel_circumference * 0.528070517)
+			time_to_move = distance/(self.wheel_circumference * 0.528070517)
 			self.motors[front_wheels[0]].power = 0.3 * self.negative
 			self.motors[front_wheels[1]].power = 0.3 * -1 * self.negative
-			time.sleep(self.time_to_move)
+			time.sleep(time_to_move)
 			self.motors[front_wheels[0]].power = BRAKE
 			self.motors[front_wheels[1]].power = BRAKE
 
@@ -94,19 +93,48 @@ class MovementMaster():
 
 		return distance- self.intergrated_distance_acceleration
 
-	#def decelerate_forwards(self, negative, front_wheels):
-	#	'''Deceleration function to slow down without over current
-	#	negative: if direction is negative it will be -1, forwards 1
-	#	front_wheels: the index of the wheels you wish to use (normally 0 and 1)'''
-	#   self.intergrated_distance_deceleration = 0.1743475436843502 # move this to the __init__()
-	#	num_of_changes = 6
-	#	time_to_decelerate = 0.75
-	#	time_per_step = time_to_decelerate/num_of_changes
-	#	steps = [0.8, 0.6, 0.4]
-	#	for i in steps:
-	#		self.motors[front_wheels[0]].power = i* negative
-	#		self.motors[front_wheels[1]].power = i* -1 * negative
-	#		time.sleep(time_per_step)
-	#		self.motors[front_wheels[1]].power = (i-0.1) * -1 * negative
-	#		self.motors[front_wheels[0]].power = (i-0.1) * negative
-	#		time.sleep(time_per_step)
+
+class RouteCommands():
+	def __init__(self, R, movement, Grabber_Enable, com):
+		self.movement = movement
+		self.Grabber_Enable = Grabber_Enable
+		self.com = com
+		self.R = R
+		print('[INITI] Route follower initialised')
+	def follow(self, route):
+		for i in route:
+			if len(i) < 2:
+				print('[WARN] Invalid instruction on line ' + str(route.index(i)+1) + ' -- skipping')
+				continue
+			if i[0] == 'forwards':
+				if len(i) == 3:
+					if i[2] == 'Plough\n' or i[2] == 'Plough':
+						front = [2, 0]
+					elif i[2] == 'Empty\n' or i[2] == 'Empty':
+						front = [1, 2]
+					else:
+						front = [0,1]
+				else:
+					front = [0,1]
+				self.movement.forwards(float(i[1]), front)# [2,0]
+			elif i[0] == 'beep':
+				self.R.power_board.piezo.buzz(float(i[1]), Note.D6)
+			elif i[0] == 'turn':
+				self.movement.rotate(float(i[1]), 0.4)
+			elif i[0] == 'sleep':
+				time.sleep(float(i[1]))
+			elif i[0] == 'grab' and self.Grabber_Enable:
+				self.com.Grab()
+			elif i[0] == 'sideways':
+				if len(i) == 3:
+					if i[2] == 'Plough\n' or i[2] == 'Plough':
+						front = [1, 0, 2]
+					elif i[2] == 'Empty\n' or i[2] == 'Empty':
+						front = [0, 2, 1]
+					else:
+						front = [2, 1, 0]
+				else:
+					front = [2,1,0]
+				self.movement.sideways(float(i[1]), front)#2,1,0
+			elif i[0]=='//':
+				print('[WARN] Commented instruction on line ' + str(route.index(i)+1) + ' -- skipping')
