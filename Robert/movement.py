@@ -92,7 +92,26 @@ class MovementMaster():
 			time.sleep(time_per_step)
 
 		return distance- self.intergrated_distance_acceleration
-
+	def curve(self, radius, angle, power = 0.3):
+		if angle < 0:
+			angle *= -1
+			negative = -1
+		else:
+			negative = 1
+		speed = self.wheel_circumference * ((4.6778*(power**6) - 88.46*(power**5) - 9.1788*(power**4) + 82.827*(power**3) + 5.6922*(power**2) + 97.405*(power))/60)
+		distance = math.pi * (2 *radius) * (float(angle)/360.0)
+		print(distance, speed, angle)
+		time_to_drive = distance / speed
+		rotatanal_speed = (angle * ((math.pi * 2 * self.arm_radius) / 360))/time_to_drive
+		rotatanal_speed *= negative
+		print(speed + rotatanal_speed, (speed * -1) + rotatanal_speed, rotatanal_speed)
+		self.motors[0].power = speed + rotatanal_speed
+		self.motors[1].power = (speed * -1) + rotatanal_speed
+		self.motors[2].power = rotatanal_speed
+		time.sleep(time_to_drive)
+		self.motors[0].power = BRAKE
+		self.motors[1].power = BRAKE
+		self.motors[2].power = BRAKE
 
 class RouteCommands():
 	def __init__(self, R, movement, Grabber_Enable, com):
@@ -120,11 +139,15 @@ class RouteCommands():
 			elif i[0] == 'beep':
 				self.R.power_board.piezo.buzz(float(i[1]), Note.D6)
 			elif i[0] == 'turn':
-				self.movement.rotate(float(i[1]), 0.4)
+				self.movement.rotate(float(i[1]), 0.3)
 			elif i[0] == 'sleep':
 				time.sleep(float(i[1]))
 			elif i[0] == 'grab' and self.Grabber_Enable:
 				self.com.Grab()
+			elif i[0] == 'curve':
+				self.movement.curve(float(i[1]), float(i[2]), 0.3)
+			elif i[0] == 'wait':
+				self.R.wait_start()
 			elif i[0] == 'sideways':
 				if len(i) == 3:
 					if i[2] == 'Plough\n' or i[2] == 'Plough':

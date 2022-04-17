@@ -5,11 +5,11 @@ from grabber import Arduino, Communicate
 from position import Position
 
 RobotInfo_Enable = False
-Instructions_Enable = False
+Instructions_Enable = True
 ServoBoard_Enable = True
 StartCameraEnable = True
 
-PathFinder_Enable = True
+PathFinder_Enable = False
 Grabber_Enable = False
 PositionFinder_Enable = False
 RouteMovement_Enable = True
@@ -68,7 +68,7 @@ while True:
 
 	if PathFinder_Enable:
 		for i in range(3):
-			position = position_finder.get_pos()
+			position = pos_get()
 			if position != None:
 				bearing = position[1]
 				tolerance = 5

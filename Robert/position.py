@@ -84,11 +84,9 @@ class Position():
 		rotation = 0
 		while position == None:
 			if rotation == 360:
-				print('One Full Turn')
-				self.movement.forwards(-0.2)
-				rotation = 0
+				break
 			position = self.get_pos()
 			rotation += self.turn_angle
 			self.movement.rotate(self.turn_angle, 0.3)
-			time.sleep(0.3)
+			time.sleep(0.2)
 		return position
