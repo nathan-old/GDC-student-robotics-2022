@@ -7,11 +7,11 @@ grab, 0
 forwards, -0.20, Grabber
 turn, 125
 forwards, 0.30, Plough
-turn, 80
+turn, 90
 forwards, 1.75, Plough
 forwards, -0.25, Plough
 
-turn, 130
+bearing, 195
 
 
 forwards, 2.651012, Plough
