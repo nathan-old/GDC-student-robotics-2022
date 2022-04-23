@@ -12,6 +12,7 @@ class Position():
         self.data_array = []
         self.turn_angle = 10
         self.index = 0 
+        self.block = False
         print('[INIT] Position finder initialised')
 
     def get_intersections(self, x0, y0, r0, x1, y1, r1):
@@ -96,12 +97,10 @@ class Position():
         else:
             return None
 
-    def get_angle(self):
-        '''Return the angle of robot'''
-        pass # TODO: Robert IMPLEMENT THIS <<<<
-
     def try_untill_find(self):
         '''Try to find a valid location untill one is found'''
+        print("[INFO] Starting try_untill_find")
+        self.block = True
         position = self.get_pos()
         rotation = 0
         while position == None:
@@ -111,4 +110,5 @@ class Position():
             rotation += self.turn_angle
             self.movement.rotate(self.turn_angle, 0.3)
             time.sleep(0.2)
+        self.block = False
         return position

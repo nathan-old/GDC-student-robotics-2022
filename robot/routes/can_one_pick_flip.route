@@ -3,10 +3,12 @@ turn, 90
 forwards, -0.20, Plough
 turn, -125
 forwards, 0.20
-grab, 0
+grab
+beep, 2
 forwards, -0.20, Grabber
 turn, 125
 forwards, 0.30, Plough
 turn, 80
 forwards, 1.75, Plough
 forwards, -0.25, Plough
+bearing

@@ -3,6 +3,7 @@ import math
 from sr.robot3 import *
 import utils
 
+
 class MovementMaster():
     def __init__(self, robot):
         ''' Robot dimension constants'''
@@ -36,7 +37,6 @@ class MovementMaster():
         self.moving = False
         for wheel in self.motors:
             wheel.power = BRAKE
-
 
     def sideways(self, distance, front_wheels=[2, 1, 0]):
         print('sideways - ' + str(distance))
@@ -139,26 +139,31 @@ class MovementMaster():
         self.motors[0].power = BRAKE
         self.motors[1].power = BRAKE
         self.motors[2].power = BRAKE
-        
 
     def pos_get(self, position_finder):
         position = position_finder.try_untill_find()
         if position != None:
-            print('[INFO] You are in position ('+str(round(position[0][0], 2))+',' +
-                  str(round(position[0][1], 2))+') at an angle of '+str(round(position[1], 2)))
+            print('[INFO] Position: {}, Angle: {}'.format(
+                round(position[0][0], 2), round(position[0][1], 2)))
             return position
         else:
             print('[WARN] Cannot find a position')
             return None
 
-    def set_bearing(self, pos, tolerance=2, tries=3):
-        target_bearing = utils.calc_target_bearing(self.R)
+    def set_bearing(self, position_finder, tries=3, target=None):
+        target_bearing = utils.calc_target_bearing(
+            self.R) if not target else target
+        print("[INFO] (movement controller) set bearing, target bearing: {}".format(
+            target_bearing))
         for i in range(tries):
-            position = self.pos_get(pos)
+            position = self.pos_get(position_finder)
             if position is None:
+                print(
+                    "Did not find position on set bearing iteration {}/{}, retrying".format(i, tries))
                 continue
 
-            utils.set_bearing(self, target_bearing, position)
+            turn_angle = target_bearing - position[1]
+            self.rotate(turn_angle, 0.3)
             break
 
 
@@ -169,58 +174,79 @@ class RouteCommands():
         self.com = com
         self.position_finder = position_finder
         self.R = R
-        self.current_command_index = 0
+        self.current_command_index = -1
         self.route = []
         print('[INIT] Route follower initialised')
 
+    def set_route(self, route):
+        self.route = route
+
     def current_command(self):
+        if self.current_command_index == -1:
+            return "not started route yet"
+        if self.current_command_index > len(self.route) - 1:
+            return "finished route"
         return self.route[self.current_command_index]
 
     def follow(self, route):
         self.route = route
+        self.current_command_index = 0
         for i in route:
-            if len(i) < 2:
-                print('[WARN] Invalid instruction on line ' +
-                      str(route.index(i)+1) + ' -- skipping')
-                continue
-            if i[0] == 'forwards':
-                if len(i) == 3:
-                    if i[2] == 'Plough\n' or i[2] == 'Plough':
-                        front = [2, 0]
-                    elif i[2] == 'Empty\n' or i[2] == 'Empty':
-                        front = [1, 2]
+            try:
+                # if len(i) < 2:
+                #    print('[WARN] Invalid instruction {} on line '.format(i) +
+                #       str(route.index(i)+1) + ' -- skipping')
+                #
+                #    continue
+
+                # Remove newline char
+                for i_sub_i in range(len(i)):
+                    i[i_sub_i] = i[i_sub_i].replace("\n", "")
+
+                if i[0] == 'forwards':
+                    if len(i) == 3:
+                        if i[2] == 'Plough\n' or i[2] == 'Plough':
+                            front = [2, 0]
+                        elif i[2] == 'Empty\n' or i[2] == 'Empty':
+                            front = [1, 2]
+                        else:
+                            front = [0, 1]
                     else:
                         front = [0, 1]
-                else:
-                    front = [0, 1]
-                self.movement.forwards(float(i[1]), front)  # [2,0]
-            elif i[0] == 'beep':
-                self.R.power_board.piezo.buzz(float(i[1]), Note.D6)
-            elif i[0] == 'turn':
-                self.movement.rotate(float(i[1]), 0.3)
-            elif i[0] == 'sleep':
-                time.sleep(float(i[1]))
-            elif i[0] == 'grab' and self.Grabber_Enable:
-                self.com.Grab()
-            elif i[0] == 'curve':
-                self.movement.curve(float(i[1]), float(i[2]), 0.3)
-            elif i[0] == 'wait':
-                self.R.wait_start()
-            elif i[0] == 'sideways':
-                if len(i) == 3:
-                    if i[2] == 'Plough\n' or i[2] == 'Plough':
-                        front = [1, 0, 2]
-                    elif i[2] == 'Empty\n' or i[2] == 'Empty':
-                        front = [0, 2, 1]
+                    self.movement.forwards(float(i[1]), front)  # [2,0]
+                elif i[0] == 'bearing':
+                    print("Running set bearing")
+                elif i[0] == 'beep':
+                    print("Beeping (D6, {} seccond(s))".format(i[1]))
+                    self.R.power_board.piezo.buzz(float(i[1]), Note.D6)
+                elif i[0] == 'turn':
+                    self.movement.rotate(float(i[1]), 0.3)
+                elif i[0] == 'sleep':
+                    print("Sleeping for {} secconds".format(i[1]))
+                    time.sleep(float(i[1]))
+                elif i[0] == 'grab' and self.Grabber_Enable:
+                    print("Grabbing")
+                    self.com.Grab()
+                elif i[0] == 'curve':
+                    self.movement.curve(float(i[1]), float(i[2]), 0.3)
+                elif i[0] == 'wait':
+                    self.R.wait_start()
+                elif i[0] == 'sideways':
+                    if len(i) == 3:
+                        if i[2] == 'Plough\n' or i[2] == 'Plough':
+                            front = [1, 0, 2]
+                        elif i[2] == 'Empty\n' or i[2] == 'Empty':
+                            front = [0, 2, 1]
+                        else:
+                            front = [2, 1, 0]
                     else:
                         front = [2, 1, 0]
-                else:
-                    front = [2, 1, 0]
-                self.movement.sideways(float(i[1]), front)  # 2,1,0
-            elif i[0] == 'bearing':
-                self.movement.set_bearing(self.position_finder)
-            elif i[0] == '//':
-                print('[WARN] Commented instruction on line ' +
-                      str(route.index(i)+1) + ' -- skipping')
-
+                    self.movement.sideways(float(i[1]), front)  # 2,1,0
+                    self.movement.set_bearing(self.position_finder)
+                elif i[0] == '//':
+                    print('[WARN] Commented instruction on line ' +
+                          str(route.index(i)+1) + ' -- skipping')
+            except Exception as e:
+                print("[ERROR] Encountered error running command {} (index {}), error: {}".format(
+                    i, self.current_command_index, e))
             self.current_command_index += 1

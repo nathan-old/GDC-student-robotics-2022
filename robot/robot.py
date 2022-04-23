@@ -19,7 +19,9 @@ Grabber_Enable = True
 Set_Bearing_Enable = False
 Goto_Set_Position = False
 Set_Position = (50, 50)  # X, Y (In mm)
-route_paths = ["routes/can_one_pick_flip.route", "routes/route.txt"]
+route_paths = ["routes/can_one_pick_flip.route"]#, "routes/route.txt"]
+# Should we create a debug log even when the calculated position is None?
+debug_log_even_with_no_pos = True
 
 # setup module holder global varibles
 arduino = None
@@ -67,21 +69,23 @@ class RobotController():
             print("[INFO][UPDATER] Debug folder already exists")
         image_folder_path = str(self.robot.usbkey) + "/images"
         print("[INFO][UPDATER] Checking if images folder exists at path: {}".format(
-            debug_folder_path))
-        if not os.path.exists(debug_folder_path):
-            os.makedirs(debug_folder_path)
+            image_folder_path))
+        if not os.path.exists(image_folder_path):
+            os.makedirs(image_folder_path)
             print("[INFO][UPDATER] Photos folder did not exist; Created")
         else:
             print("[INFO][UPDATER] Photos folder already exists")
         image_index = 0
         while True:
-            self.robot.camera.save(image_folder_path +
+            self.robot.camera.save(image_folder_path + "/" +
                                    str(image_index) + '.png')
             image_index += 1
-            try_calc_pos = self.position_finder.get_pos()
-            if try_calc_pos:
+            try_calc_pos = None
+            if not self.position_finder.block:
+                try_calc_pos = self.position_finder.get_pos() 
+            if try_calc_pos or debug_log_even_with_no_pos:
                 is_moving = self.movement_controller.moving
-                with open(debug_folder_path + str(time.time()) + '-debug.json', "w") as debug_file:
+                with open(debug_folder_path + "/" + str(time.time()) + '-debug.json', "w") as debug_file:
                     content_dict = {
                         "calculated_position": try_calc_pos,
                         "is_moving": is_moving,
@@ -126,6 +130,8 @@ class RobotController():
             print("[INFO] Loaded all {} of {} routes, totaling {} instructions".format(
                 loaded_routes, len(self.route_paths), len(global_route)))
             self.instructions = global_route
+            # Purley for getting the current route number and not crashing
+            self.route_commands.set_route(self.instructions)
         print("[INFO] Starting updater thread")
         self.updater_thread.start()
         print("[INFO] Prebutton press startup logic done")
@@ -166,18 +172,10 @@ class RobotController():
             self.route_commands.follow(self.instructions)
 
     def get_position(self):
-        position = position_finder.try_untill_find()
-        if position != None:
-            print('[INFO] Position: {}, Angle: {}'.format(
-                round(position[0][0], 2), round(position[0][1], 2)))
-            return position
-        else:
-            print('[WARN] Cannot find a position')
-            return None
+        return self.movement_controller.pos_get(self.position_finder)
 
     def set_bearing(self, bearing):
-        position = self.get_position()
-        utils.set_bearing(self.movement_controller, bearing, position)
+        self.movement_controller.set_bearing(self.position_finder, target=bearing)
 
 
 def run():

@@ -28,9 +28,10 @@ class Arduino():
 
 
 class Communicate():
-    def __init__(self, serial):
+    def __init__(self, serial, grab_sleep_time=3):
         print('[INITI] Arduino communications initialised')
         self.ser = serial
+        self.grab_sleep_time = grab_sleep_time
     def Write(self, String):
         '''Write to the serial port of the setup arduino
         String: The string data you wish to send'''
@@ -41,7 +42,7 @@ class Communicate():
     def Grab(self):
         '''Sends the grab command to the arduino'''
         self.ser.write(b'A')
-        time.sleep(4)
+        time.sleep(self.grab_sleep_time)
     def Grab_No_Sleep(self):
         '''Sends the grab command to the arduino'''
         self.ser.write(b'A')
