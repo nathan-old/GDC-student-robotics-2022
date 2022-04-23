@@ -66,11 +66,9 @@ def pos_get():
 
 
 def set_bearing(bearing, tolerance=2, tries=3):
-    for i in range(tries):
-        position = pos_get()
-        turn_angle = position[1] - bearing
-        if turn_angle > tolerance:
-            movement.rotate(turn_angle, 0.3)
+    position = pos_get()
+    turn_angle = position[1] - bearing
+    movement.rotate(turn_angle, 0.3)
 
 
 print('Finished booting press start')
