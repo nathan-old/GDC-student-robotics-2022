@@ -9,7 +9,7 @@ from position import Position
 RobotInfo_Enable = True
 Instructions_Enable = True
 PathFinder_Enable = False
-Grabber_Enable = False
+Grabber_Enable = True
 Set_Bearing_Enable = False
 Goto_Set_Position = False
 Set_Position = (50, 50)  # X, Y (In mm)
@@ -21,7 +21,7 @@ R = Robot(auto_start=True, verbose=True, ignored_ruggeduinos=[RUGGEDUINO_ID])
 com = Communicate(arduino.Start(R, RUGGEDUINO_ID))
 position_finder = Position(R)
 movement = MovementMaster(R)
-routecommands = RouteCommands(R, movement, Grabber_Enable, com)
+routecommands = RouteCommands(R, movement, Grabber_Enable, com, position_finder)
 
 R.servo_board.servos[0].position = 0  # To give power output
 R.camera.see()  # start camera stream now(so its quicker to access mid-game)

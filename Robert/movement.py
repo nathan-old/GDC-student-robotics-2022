@@ -6,6 +6,7 @@ class MovementMaster():
 		''' Robot dimension constants'''
 		print('[INITI] Movement Master initialised')
 		R = robot
+		self.R = robot
 		self.arm_radius = 0.25
 		self.wheel_circumference = 0.3299
 		self.motors = [R.motor_boards['SR0PJ1W'].motors[0], R.motor_boards['SR0VG1M'].motors[0], R.motor_boards['SR0VG1M'].motors[1]]# m0 and m1 are front motors
@@ -113,12 +114,39 @@ class MovementMaster():
 		self.motors[0].power = BRAKE
 		self.motors[1].power = BRAKE
 		self.motors[2].power = BRAKE
+	def pos_get(self, position_finder):
+		position = position_finder.try_untill_find()
+		if position != None:
+			print('[INFO] You are in position ('+str(round(position[0][0], 2))+',' +
+				str(round(position[0][1], 2))+') at an angle of '+str(round(position[1], 2)))
+			return position
+		else:
+			print('[WARN] Cannot find a position')
+			return None
+	def set_bearing(self, pos, tolerance=2, tries=3):
+		if int(self.R.zone) == 0:
+			start_beraing = 135 # 165
+		elif int(self.R.zone) == 1:
+			start_beraing = 225 # 255
+		elif int(self.R.zone) == 2:
+			start_beraing = 315 # 345
+		elif int(self.R.zone) == 3:
+			start_beraing = 45 # 075
+		for i in range(tries):
+			position = self.pos_get(pos)
+			if position is None:
+				continue
+
+			turn_angle = float(position[1]) - float(start_beraing)
+			self.rotate(turn_angle, 0.3)
+			break
 
 class RouteCommands():
-	def __init__(self, R, movement, Grabber_Enable, com):
+	def __init__(self, R, movement, Grabber_Enable, com, position_finder):
 		self.movement = movement
 		self.Grabber_Enable = Grabber_Enable
 		self.com = com
+		self.position_finder = position_finder
 		self.R = R
 		print('[INITI] Route follower initialised')
 	def follow(self, route):
@@ -160,5 +188,8 @@ class RouteCommands():
 				else:
 					front = [2,1,0]
 				self.movement.sideways(float(i[1]), front)#2,1,0
+			elif i[0] == 'bearing':
+				self.movement.set_bearing(self.position_finder)
 			elif i[0]=='//':
 				print('[WARN] Commented instruction on line ' + str(route.index(i)+1) + ' -- skipping')
+			
