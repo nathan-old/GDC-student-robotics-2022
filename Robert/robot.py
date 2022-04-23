@@ -81,7 +81,7 @@ FirstIteration = True
 def save_image_loop():
     image_index = 0
     while True:
-        R.camera.save(R.usbkey/str(image_index)+'.png')
+        R.camera.save(str(R.usbkey/str(image_index)) + '.png')
         image_index += 1
 
 
