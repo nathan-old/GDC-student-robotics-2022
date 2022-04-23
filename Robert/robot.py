@@ -9,7 +9,8 @@ Instructions_Enable = True
 PathFinder_Enable = False
 Grabber_Enable = False
 Set_Bearing_Enable = False
-
+Goto_Set_Position = True
+Set_Position = (50, 50) # X, Y (In mm)
 
 # setup all modules
 arduino = Arduino()
@@ -65,6 +66,7 @@ def set_bearing(bearing, tolerance = 2, tries = 3):
 			movement.rotate(turn_angle, 0.3)
 print('Finished booting press start')
 '''Start button pressed run code below after start'''
+FirstIteration = True
 while True:
 	R.wait_start()
 	if Set_Bearing_Enable:
@@ -87,11 +89,20 @@ while True:
 		if position != None:
 			place = position[0]
 			route_found = pathfinder.PathFind(place, can_locations, obstacles)
+
+			
 			route_found.append(['grab', '0'])
 			routecommands.follow(route_found)
 			print('[INFO] found a route')
 		else:
 			print('[WARN] cannot get pathfinding to work - insufficient data')
 
-	if Instructions_Enable:
+	elif Instructions_Enable:
 		routecommands.follow(route)
+	elif Goto_Set_Position:
+		if Set_Position == (0, 0) and FirstIteration:
+			print("[WARN] Goto Set positon enabled but SetPosition is (0,0)")
+		
+			
+	
+	FirstIteration = False
