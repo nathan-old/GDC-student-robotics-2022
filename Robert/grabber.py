@@ -23,7 +23,7 @@ class Arduino():
         '''
         ruggeduino_device = R.ignored_ruggeduinos[ID]
         if ruggeduino_device != None:
-	        self.ser = serial.Serial(ruggeduino_device, baudrate=9600)
+            self.ser = serial.Serial(ruggeduino_device, baudrate=9600)
         return self.ser
 
 
@@ -42,3 +42,6 @@ class Communicate():
         '''Sends the grab command to the arduino'''
         self.ser.write(b'A')
         time.sleep(4)
+    def Grab_No_Sleep(self):
+        '''Sends the grab command to the arduino'''
+        self.ser.write(b'A')

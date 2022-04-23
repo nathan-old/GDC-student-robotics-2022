@@ -1,5 +1,5 @@
 import matplotlib.pyplot as plt
-import easygui, math, os
+import easygui, math
 
 
 class RunRoute():
@@ -13,12 +13,23 @@ class RunRoute():
         self.route_file = easygui.fileopenbox(msg='Select a route file', title='Select a file', default='*.txt')
         return self.route_file
     def set_bkg_file(self, plt):
-        bk = easygui.fileopenbox(msg='Select a route file', title='Select a file', default='*.png')
+        bk = easygui.fileopenbox(msg='Select a background file', title='Select an image', default='*.png')
         plt.imshow(plt.imread(bk), extent=[0, 5.75, 0, 5.75])
-    def set_start_zone(self):
-        self.start_zone = int(input('Which starting zone? (0,1,2,3)'))
+    def set_start_zone(self, value = 4):
+        if value == 4:
+            self.start_zone = int(input('Which starting zone? (0,1,2,3)'))
+        else:
+            self.set_start_zone = value
     def set_start_angle(self):
-        self.angle = int(input('What angle do you wish to start at? (Bearing form 0 is top)'))
+        if int(self.start_zone) == 0:
+            self.angle = 105
+        elif int(self.start_zone) == 1:
+            self.angle = 195
+        elif int(self.start_zone) == 2:
+            self.angle = 285
+        elif int(self.start_zone) == 3:
+            self.angle = 15
+        # self.angle = int(input('What angle do you wish to start at? (Bearing form 0 is top)'))
     def route_file_to_array(self):
         with open(self.route_file,'r') as route_data:
             self.route = route_data.readlines()
@@ -74,12 +85,49 @@ class RunRoute():
 
 runroute = RunRoute()
 runroute.set_route_file()
-runroute.set_start_zone()
+runroute.set_bkg_file(plt)
+runroute.set_start_zone(0)
 runroute.set_start_angle()
 runroute.route_file_to_array()
 runroute.start_zone_to_coords()
 runroute.follow_instructions()
-runroute.set_bkg_file(plt)
+x = []
+y = []
+for i in runroute.coords:
+    x.append(i[0])
+    y.append(i[1])
+plt.plot(x,y)
+
+
+
+runroute.start_zone = 1
+runroute.set_start_angle()
+runroute.start_zone_to_coords()
+runroute.follow_instructions()
+x = []
+y = []
+for i in runroute.coords:
+    x.append(i[0])
+    y.append(i[1])
+plt.plot(x,y)
+
+
+runroute.start_zone = 2
+runroute.set_start_angle()
+runroute.start_zone_to_coords()
+runroute.follow_instructions()
+x = []
+y = []
+for i in runroute.coords:
+    x.append(i[0])
+    y.append(i[1])
+plt.plot(x,y)
+
+
+runroute.start_zone = 3
+runroute.set_start_angle()
+runroute.start_zone_to_coords()
+runroute.follow_instructions()
 x = []
 y = []
 for i in runroute.coords:

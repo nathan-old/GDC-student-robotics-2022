@@ -19,6 +19,13 @@
 # Beep
 ```beep, TIME```
 - TIME: the (float) time you wish the robot to beep for.
+# Wait Start
+```wait, 0```
+- needs a comma seperation to pass.
+# curve
+```curve, RADIUS, Angle```
+- RADIUS: The radius of the turn in which you want to follow.
+- ANGLE: The angle at which you want to turn by.
 # Comments
 ```\\, COMMAND```
 - COMMAND: the infomation you wish to comment out/ ignore.

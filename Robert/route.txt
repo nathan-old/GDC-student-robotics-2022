@@ -1,3 +1,5 @@
-curve, 0.1, 180
+forwards, 5, Plough
 wait, 0
-curve, 0.5, 360
+forwards, 5, Empty
+wait, 0
+forwards, 5, Grab
