@@ -92,8 +92,8 @@ while True:
     R.wait_start()
     if Set_Bearing_Enable:
         set_bearing(start_beraing)
-    if Grabber_Enable:
-        com.Grab_No_Sleep()
+    # if Grabber_Enable:
+        # com.Grab_No_Sleep()
         # com.Grab_No_Sleep()
 
     if PathFinder_Enable:
