@@ -50,6 +50,7 @@ class RobotController():
         self.after_button()
 
     def updater_thread_logic(self):
+        print("[INFO] Started updater thread")
         image_index = 0
         while True:
             # TODO: Try and find our location, if we can find it save to the json file. Also save other data (like current action being performed, are we moving etc)
@@ -88,10 +89,9 @@ class RobotController():
             print("[INFO] Loaded all {} of {} routes, totaling {} instructions".format(
                 loaded_routes, len(self.route_paths), len(global_route)))
             self.instructions = global_route
-
+        print("[INFO] Starting updater thread")
         self.updater_thread.start()
-
-        pass
+        print("[INFO] Prebutton press startup logic done")
 
     def start_bearing(self):
         if int(R.zone) == 0:
@@ -116,7 +116,7 @@ class RobotController():
                     if 90 - tolerance > bearing or bearing > 90 + tolerance:
                         movement.rotate(float(bearing-90), 0.3)
                 else:
-                    print('[WARN] cannot find valid pos ')
+                    print('[WARN] Cannot determine pathfinding location, cannot pathfind ')
 
             if self.position != None:
                 place = self.position[0]
@@ -127,7 +127,7 @@ class RobotController():
                 self.route_commands.follow(route_found)
                 print('[INFO] found a route')
             else:
-                print('[WARN] cannot get pathfinding to work - insufficient data')
+                print('[WARN] cannot get pathfinding to work - insufficient position data')
         elif self.use_instructions:
             print("[INFO] Use instructions enabled, following {} loaded route commands".format(
                 len(self.instructions)))
@@ -164,6 +164,6 @@ def run():
     # Create the robot controller class
     robot_controller = RobotController(R, arduino, com, position_finder, movement, routecommands,
                                        Set_Bearing_Enable, Instructions_Enable, PathFinder_Enable, route_paths)
-
+    robot_controller.go()
 
 run()
