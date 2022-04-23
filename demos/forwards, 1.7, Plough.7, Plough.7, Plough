@@ -1,0 +1,6 @@
+forwards, 1.7, Plough
+turn, -30
+forwards, 0.2, Plough
+forwards, -0.2, Plough
+turn, -120
+grab, 0

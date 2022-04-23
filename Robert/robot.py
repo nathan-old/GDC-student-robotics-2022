@@ -8,7 +8,7 @@ RobotInfo_Enable = True
 Instructions_Enable = True
 PathFinder_Enable = False
 Grabber_Enable = False
-Set_Bearing_Enable = False
+Set_Bearing_Enable = True
 
 
 # setup all modules
