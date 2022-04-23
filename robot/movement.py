@@ -1,7 +1,7 @@
 import time
 import math
 from sr.robot3 import *
-
+import utils
 
 class MovementMaster():
     def __init__(self, robot):
@@ -16,6 +16,7 @@ class MovementMaster():
         self.intergrated_distance_acceleration = 0.199569041087827
         self.rps_constant = 1.54090799872
         self.speed = self.wheel_circumference * self.rps_constant
+        self.moving = False
 
     def rotate(self, angle, power):
         ''' function to turn the robot'''
@@ -28,11 +29,14 @@ class MovementMaster():
         speed = self.wheel_circumference * ((4.6778*(power**6) - 88.46*(power**5) - 9.1788*(
             power**4) + 82.827*(power**3) + 5.6922*(power**2) + 97.405*(power))/60)
         time_to_move = (angle * ((math.pi * 2 * self.arm_radius) / 360))/speed
+        self.moving = True
         for wheel in self.motors:
             wheel.power = power*negative
         time.sleep(time_to_move)
+        self.moving = False
         for wheel in self.motors:
             wheel.power = BRAKE
+
 
     def sideways(self, distance, front_wheels=[2, 1, 0]):
         print('sideways - ' + str(distance))
@@ -45,10 +49,12 @@ class MovementMaster():
         speed = self.wheel_circumference * ((4.6778*(power**6) - 88.46*(power**5) - 9.1788*(
             power**4) + 82.827*(power**3) + 5.6922*(power**2) + 97.405*(power))/60)
         time_to_move = distance/speed
+        self.moving = True
         self.motors[front_wheels[0]].power = power * negative
         self.motors[front_wheels[1]].power = -0.35 * negative
         self.motors[front_wheels[2]].power = -0.35 * negative
         time.sleep(time_to_move)
+        self.moving = False
         for wheel in self.motors:
             wheel.power = BRAKE
 
@@ -67,17 +73,21 @@ class MovementMaster():
             distance = self.accelerate_forwards(
                 distance, self.negative, front_wheels)
             time_to_move = distance/self.speed
+            self.moving = True
             self.motors[front_wheels[0]].power = 0.8 * self.negative
             self.motors[front_wheels[1]].power = 0.8 * -1 * self.negative
             time.sleep(time_to_move)
+            self.moving = False
             #self.decelerate_forwards(self.negative, front_wheels)
             self.motors[front_wheels[0]].power = BRAKE
             self.motors[front_wheels[1]].power = BRAKE
         else:
             time_to_move = distance/(self.wheel_circumference * 0.528070517)
+            self.moving = True
             self.motors[front_wheels[0]].power = 0.3 * self.negative
             self.motors[front_wheels[1]].power = 0.3 * -1 * self.negative
             time.sleep(time_to_move)
+            self.moving = False
             self.motors[front_wheels[0]].power = BRAKE
             self.motors[front_wheels[1]].power = BRAKE
 
@@ -120,13 +130,16 @@ class MovementMaster():
         rotatanal_speed *= negative
         print(speed + rotatanal_speed, (speed * -1) +
               rotatanal_speed, rotatanal_speed)
+        self.moving = True
         self.motors[0].power = speed + rotatanal_speed
         self.motors[1].power = (speed * -1) + rotatanal_speed
         self.motors[2].power = rotatanal_speed
         time.sleep(time_to_drive)
+        self.moving = False
         self.motors[0].power = BRAKE
         self.motors[1].power = BRAKE
         self.motors[2].power = BRAKE
+        
 
     def pos_get(self, position_finder):
         position = position_finder.try_untill_find()
@@ -139,22 +152,13 @@ class MovementMaster():
             return None
 
     def set_bearing(self, pos, tolerance=2, tries=3):
-        start_beraing = None
-        if int(self.R.zone) == 0:
-            start_beraing = 105
-        elif int(self.R.zone) == 1:
-            start_beraing = 195
-        elif int(self.R.zone) == 2:
-            start_beraing = 285
-        elif int(self.R.zone) == 3:
-            start_beraing = 15
+        target_bearing = utils.calc_target_bearing(self.R)
         for i in range(tries):
             position = self.pos_get(pos)
             if position is None:
                 continue
 
-            turn_angle = float(position[1]) - float(start_beraing)
-            self.rotate(turn_angle, 0.3)
+            utils.set_bearing(self, target_bearing, position)
             break
 
 
@@ -165,9 +169,15 @@ class RouteCommands():
         self.com = com
         self.position_finder = position_finder
         self.R = R
-        print('[INITI] Route follower initialised')
+        self.current_command_index = 0
+        self.route = []
+        print('[INIT] Route follower initialised')
+
+    def current_command(self):
+        return self.route[self.current_command_index]
 
     def follow(self, route):
+        self.route = route
         for i in route:
             if len(i) < 2:
                 print('[WARN] Invalid instruction on line ' +
@@ -212,3 +222,5 @@ class RouteCommands():
             elif i[0] == '//':
                 print('[WARN] Commented instruction on line ' +
                       str(route.index(i)+1) + ' -- skipping')
+
+            self.current_command_index += 1

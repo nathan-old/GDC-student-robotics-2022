@@ -1,3 +1,6 @@
+import json
+import os
+from sqlite3 import Timestamp
 from threading import Thread
 from sr.robot3 import *
 import time
@@ -6,6 +9,7 @@ from movement import MovementMaster, RouteCommands
 from grabber import Arduino, Communicate
 from position import Position
 from constants import can_locations, obstacles
+import utils
 
 # Config varibles
 RobotInfo_Enable = True
@@ -15,7 +19,7 @@ Grabber_Enable = True
 Set_Bearing_Enable = False
 Goto_Set_Position = False
 Set_Position = (50, 50)  # X, Y (In mm)
-route_paths = ["route.txt"]
+route_paths = ["routes/can_one_pick_flip.route", "routes/route.txt"]
 
 # setup module holder global varibles
 arduino = None
@@ -25,6 +29,8 @@ com = None
 position_finder = None
 movement = None
 routecommands = None
+
+
 class RobotController():
     def __init__(self, robot, arduino, arduino_communication, position_finder, movement_controller, route_commands, set_bearing, use_instructions, use_pathfinder, route_paths):
         self.robot = robot
@@ -45,24 +51,53 @@ class RobotController():
     def go(self):
         self.prebutton_setup()
         print("[INFO] Prebutton press setup complete, waiting for button press")
-        R.wait_start()
+        self.robot.wait_start()
         print("[INFO] Button pressed, running main code")
         self.after_button()
 
     def updater_thread_logic(self):
         print("[INFO] Started updater thread")
+        debug_folder_path = str(self.robot.usbkey) + "/debug"
+        print("[INFO][UPDATER] Checking if debug folder exists at path: {}".format(
+            debug_folder_path))
+        if not os.path.exists(debug_folder_path):
+            os.makedirs(debug_folder_path)
+            print("[INFO][UPDATER] Debug folder did not exist; Created")
+        else:
+            print("[INFO][UPDATER] Debug folder already exists")
+        image_folder_path = str(self.robot.usbkey) + "/images"
+        print("[INFO][UPDATER] Checking if images folder exists at path: {}".format(
+            debug_folder_path))
+        if not os.path.exists(debug_folder_path):
+            os.makedirs(debug_folder_path)
+            print("[INFO][UPDATER] Photos folder did not exist; Created")
+        else:
+            print("[INFO][UPDATER] Photos folder already exists")
         image_index = 0
         while True:
-            # TODO: Try and find our location, if we can find it save to the json file. Also save other data (like current action being performed, are we moving etc)
-            R.camera.save(str(R.usbkey/str(image_index)) + '.png')
+            self.robot.camera.save(image_folder_path +
+                                   str(image_index) + '.png')
             image_index += 1
+            try_calc_pos = self.position_finder.get_pos()
+            if try_calc_pos:
+                is_moving = self.movement_controller.moving
+                with open(debug_folder_path + str(time.time()) + '-debug.json', "w") as debug_file:
+                    content_dict = {
+                        "calculated_position": try_calc_pos,
+                        "is_moving": is_moving,
+                        "timestamp": time.time(),
+                        "current_route_step_command": self.route_commands.current_command(),
+                        "current_route_step_index": self.route_commands.current_command_index
+                    }
+                    content = json.dumps(content_dict)
+                    debug_file.write(content)
 
     def prebutton_setup(self):
-        R.servo_board.servos[0].position = 0  # To give power output
-        R.camera.see()  # start camera stream now (so its quicker to access mid-game)
+        self.robot.servo_board.servos[0].position = 0  # To give power output
+        self.robot.camera.see()  # start camera stream now (so its quicker to access mid-game)
         print("[INFO] Starting Zone: {}".format(self.robot.zone))
         print("[INFO] Arena: {}".format(self.robot.arena))
-        print("[INFO] Mode: {}".format(self.r.mode))
+        print("[INFO] Mode: {}".format(self.robot.mode))
         print("[INFO] Zone: {}".format(self.robot.zone))
         print("[INFO] Robot arm radius: {}".format(
             self.movement_controller.arm_radius))
@@ -77,10 +112,12 @@ class RobotController():
                 try:
                     with open(route_file_path, 'r') as route_file:
                         route_unsplit = route_file.readlines()
+                        print("[DEBUG] route readlines len: {}".format(
+                            len(route_unsplit)))
                         route_split = []
                         for i in range(len(route_unsplit)):
                             route_split.append(route_unsplit[i].split(', '))
-                        global_route.extend(global_route)
+                        global_route.extend(route_split)
                         loaded_routes += 1
                 except Exception as error:
                     print(
@@ -94,14 +131,7 @@ class RobotController():
         print("[INFO] Prebutton press startup logic done")
 
     def start_bearing(self):
-        if int(R.zone) == 0:
-            return 105
-        elif int(R.zone) == 1:
-            return 195
-        elif int(R.zone) == 2:
-            return 285
-        elif int(R.zone) == 3:
-            return 15
+        return utils.calc_target_bearing(self.robot)
 
     def after_button(self):
         if self.set_bearing:
@@ -116,7 +146,8 @@ class RobotController():
                     if 90 - tolerance > bearing or bearing > 90 + tolerance:
                         movement.rotate(float(bearing-90), 0.3)
                 else:
-                    print('[WARN] Cannot determine pathfinding location, cannot pathfind ')
+                    print(
+                        '[WARN] Cannot determine pathfinding location, cannot pathfind ')
 
             if self.position != None:
                 place = self.position[0]
@@ -127,7 +158,8 @@ class RobotController():
                 self.route_commands.follow(route_found)
                 print('[INFO] found a route')
             else:
-                print('[WARN] cannot get pathfinding to work - insufficient position data')
+                print(
+                    '[WARN] cannot get pathfinding to work - insufficient position data')
         elif self.use_instructions:
             print("[INFO] Use instructions enabled, following {} loaded route commands".format(
                 len(self.instructions)))
@@ -145,9 +177,7 @@ class RobotController():
 
     def set_bearing(self, bearing):
         position = self.get_position()
-        turn_angle = position[1] - bearing
-        movement.rotate(turn_angle, 0.3)
-
+        utils.set_bearing(self.movement_controller, bearing, position)
 
 
 def run():
@@ -165,5 +195,6 @@ def run():
     robot_controller = RobotController(R, arduino, com, position_finder, movement, routecommands,
                                        Set_Bearing_Enable, Instructions_Enable, PathFinder_Enable, route_paths)
     robot_controller.go()
+
 
 run()

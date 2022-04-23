@@ -1,19 +1,5 @@
-forwards, 1.65, Plough
-turn, 90
-forwards, -0.20, Plough
-turn, -125
-forwards, 0.20
-grab, 0
-forwards, -0.20, Grabber
-turn, 125
-forwards, 0.30, Plough
-turn, 80
-forwards, 1.75, Plough
-forwards, -0.25, Plough
-
-turn, 130
-
-
+//, TODO: Split up into tasks and give each a seperate .route file; then order in the program
+bearing
 forwards, 2.651012, Plough
 
 turn, 2.5
@@ -82,6 +68,7 @@ forwards, 1.74232, Plough
 forwards, 0.2, Plough
 forwards, -0.2, Plough
 turn, -150
+//, Should the above be replaced with bearing command?
 
 forwards, 2.651012, Plough
 
