@@ -125,13 +125,13 @@ class MovementMaster():
 			return None
 	def set_bearing(self, pos, tolerance=2, tries=3):
 		if int(self.R.zone) == 0:
-			start_beraing = 225 # 165
+			start_beraing = 105 # 165
 		elif int(self.R.zone) == 1:
-			start_beraing = 315 # 255
+			start_beraing = 195 # 255
 		elif int(self.R.zone) == 2:
-			start_beraing = 45 # 345
+			start_beraing = 285 # 345
 		elif int(self.R.zone) == 3:
-			start_beraing = 135 # 075
+			start_beraing = 15 # 075
 		for i in range(tries):
 			position = self.pos_get(pos)
 			if position is None:
