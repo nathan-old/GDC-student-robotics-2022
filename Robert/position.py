@@ -47,6 +47,7 @@ class Position():
                 radius = (i[2]*math.cos(math.radians(i[0])))
                 circles.append([self.marker_list[i[3]][1],
                                self.marker_list[i[3]][2], radius])
+            print(circles)
             valid_points = [[], []]
             for i in range(len(circles)):
                 if i + 1 != len(circles):
@@ -59,9 +60,12 @@ class Position():
                     if 0 < i[0] < 5750 and 0 < i[1] < 5750:
                         valid_points[0].append(i[0])
                         valid_points[1].append(i[1])
+            print(str(len(valid_points)) + " valid points")
             if len(valid_points[0]) > 1:
+                print("Enough valid points > 1")
                 avg_x = sum(valid_points[0]) / len(valid_points[0])
                 avg_y = sum(valid_points[1]) / len(valid_points[1])
+                print(avg_x, avg_y)
                 bearing_array = []
                 for i in seen_markers:
                     bearing = math.atan2(
@@ -71,6 +75,8 @@ class Position():
                     elif bearing > math.radians(360):
                         bearing -= math.radians(360)
                     bearing_array.append(bearing)
+
+                print(bearing_array)
                 x, y = 0, 0
                 for i in bearing_array:
                     x += math.cos(i)
@@ -83,6 +89,7 @@ class Position():
                 # array of necessary data in order: (coordinates array), bearing, the markers being viewed by the camera
                 self.data_array.append(
                     [[avg_x/1000, avg_y/1000], bearing, marker_ids])
+                print(avg_x, avg_y, bearing, marker_ids)
                 return [[avg_x/1000, avg_y/1000], bearing, marker_ids]
             else:
                 return None
