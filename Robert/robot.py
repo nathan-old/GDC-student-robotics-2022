@@ -1,3 +1,4 @@
+from threading import Thread
 from sr.robot3 import *
 import time, pathfinder
 from movement import MovementMaster, RouteCommands
@@ -67,6 +68,16 @@ def set_bearing(bearing, tolerance = 2, tries = 3):
 print('Finished booting press start')
 '''Start button pressed run code below after start'''
 FirstIteration = True
+
+def save_image_loop():
+	while True:
+		R.camera.save(R.usbkey/str(image_index)+'.png')
+		image_index += 1
+
+image_index = 0
+SaveThread = Thread.spawn(target=save_image_loop)
+SaveThread.start()
+
 while True:
 	R.wait_start()
 	if Set_Bearing_Enable:

@@ -20,7 +20,7 @@ turn, 5
 forwards, 0.031592, Plough
 turn, 2.5
 
-forwards, 0.090665, Plough
+forwards, 0.12, Plough
 
 turn, 5
 forwards, 0.052293, Plough
@@ -64,5 +64,81 @@ forwards, 0.038996, Plough
 turn, 4.2
 forwards, 0.038781, Plough
 turn, 0.263
+
+forwards, 1.74232, Plough
+
+
+
+//, NEW ROUTE
+forwards, 0.2, Plough
+forwards, -0.2, Plough
+turn, -150
+
+forwards, 2.651012, Plough
+
+turn, -2.5
+forwards, 0.031592, Plough
+turn, -5
+forwards, 0.031592, Plough
+turn, -5
+forwards, 0.031592, Plough
+turn, -5
+forwards, 0.031592, Plough
+turn, -5
+forwards, 0.031592, Plough
+turn, -5
+forwards, 0.031592, Plough
+turn, -5
+forwards, 0.031592, Plough
+turn, -5
+forwards, 0.031592, Plough
+turn, -5
+forwards, 0.031592, Plough
+turn, -2.5
+
+forwards, 0.12, Plough
+
+turn, -5
+forwards, 0.052293, Plough
+turn, -10
+forwards, 0.052293, Plough
+turn, -10
+forwards, 0.052293, Plough
+turn, -10
+forwards, 0.052293, Plough
+turn, -10
+forwards, 0.052293, Plough
+turn, -10
+forwards, 0.052293, Plough
+turn, -10
+forwards, 0.052293, Plough
+turn, -10
+forwards, 0.052293, Plough
+turn, -10
+
+forwards, 0.052293, Plough
+turn, -5
+
+forwards, 1.010781, Plough
+
+turn, -2.5
+forwards, 0.039027, Plough
+turn, -5
+forwards, 0.039027, Plough
+turn, -5
+forwards, 0.039027, Plough
+turn, -5
+forwards, 0.039027, Plough
+turn, -5
+forwards, 0.039027, Plough
+turn, -5
+forwards, 0.039027, Plough
+turn, -5
+forwards, 0.039027, Plough
+turn, -5
+forwards, 0.038996, Plough
+turn, -4.2
+forwards, 0.038781, Plough
+turn, -0.263
 
 forwards, 1.74232, Plough
