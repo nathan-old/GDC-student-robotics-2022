@@ -76,10 +76,10 @@ def set_bearing(bearing, tolerance=2, tries=3):
 print('Finished booting press start')
 '''Start button pressed run code below after start'''
 FirstIteration = True
-image_index = 0
 
 
 def save_image_loop():
+    image_index = 0
     while True:
         R.camera.save(R.usbkey/str(image_index)+'.png')
         image_index += 1
