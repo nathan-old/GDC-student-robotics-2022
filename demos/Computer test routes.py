@@ -14,7 +14,8 @@ class RunRoute():
         return self.route_file
     def set_bkg_file(self, plt):
         bk = easygui.fileopenbox(msg='Select a background file', title='Select an image', default='*.png')
-        plt.imshow(plt.imread(bk), extent=[0, 5.75, 0, 5.75])
+        if bk != None:
+            plt.imshow(plt.imread(bk), extent=[0, 5.75, 0, 5.75])
     def set_start_zone(self, value = 4):
         if value == 4:
             self.start_zone = int(input('Which starting zone? (0,1,2,3)'))

@@ -90,7 +90,7 @@ while True:
 			place = position[0]
 			route_found = pathfinder.PathFind(place, can_locations, obstacles)
 
-			
+
 			route_found.append(['grab', '0'])
 			routecommands.follow(route_found)
 			print('[INFO] found a route')
@@ -99,9 +99,6 @@ while True:
 
 	elif Instructions_Enable:
 		routecommands.follow(route)
-	elif Goto_Set_Position:
-		if Set_Position == (0, 0) and FirstIteration:
-			print("[WARN] Goto Set positon enabled but SetPosition is (0,0)")
 		
 			
 	

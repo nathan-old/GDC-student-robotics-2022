@@ -53,6 +53,7 @@ class MovementMaster():
 		front_wheels: the index of the wheels you wish to use (normally 0 and 1)'''
 		print('forwards - ' + str(distance))
 		distance *= 0.9293
+		distance /= 1.11
 		self.negative = 1
 		if distance < 0 :
 			self.negative = -1
