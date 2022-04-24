@@ -16,7 +16,7 @@ RobotInfo_Enable = True
 Instructions_Enable = True
 PathFinder_Enable = False
 Grabber_Enable = True
-Set_Bearing_Enable = True
+Set_Bearing_Enable = False
 route_paths = ["routes/can_one_pick_flip.route",
                "routes/left_sweep.route", "routes/right_sweep.route"]
 # Should we create a debug log even when the calculated position is None?

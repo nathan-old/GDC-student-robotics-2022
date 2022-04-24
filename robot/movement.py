@@ -220,7 +220,7 @@ class RouteCommands():
                 elif i[0] == 'bearing':
                     print("Running set bearing")
                     if len(i) == 2:
-                        self.movement.set_bearing(self.position_finder, target=int(i[1]))
+                        self.movement.set_bearing(self.position_finder, target=float(i[1]))
                     else:
                         self.movement.set_bearing(self.position_finder)
                 elif i[0] == 'beep':
