@@ -166,7 +166,6 @@ class MovementMaster():
             self.rotate(turn_angle, 0.3)
             break
 
-
 class RouteCommands():
     def __init__(self, R, movement, Grabber_Enable, com, position_finder):
         self.movement = movement
