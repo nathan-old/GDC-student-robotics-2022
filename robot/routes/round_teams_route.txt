@@ -1,69 +1,73 @@
-//set_position_center
 bearing, 120
-forwards, 4.1, Plough
-turn -9.0
-forwards, 0.0156918
-turn -9.0
-forwards, 0.0156918
-turn -9.0
-forwards, 0.0156918
-turn -9.0
-forwards, 0.0156918
-turn -9.0
-forwards, 0.0156918
-turn -9.0
-forwards, 0.0156918
-turn -9.0
-forwards, 0.0156918
-turn -9.0
-forwards, 0.0156918
-turn -9.0
-forwards, 0.0156918
-turn -9.0
-forwards, 0.0156918
-turn -9.0
-forwards, 1.4, Plough
-turn -9.0
-forwards, 0.0156918
-turn -9.0
-forwards, 0.0156918
-turn -9.0
-forwards, 0.0156918
-turn -9.0
-forwards, 0.0156918
-turn -9.0
-forwards, 0.0156918
-turn -9.0
-forwards, 0.0156918
-turn -9.0
-forwards, 0.0156918
-turn -9.0
-forwards, 0.0156918
-turn -9.0
-forwards, 0.0156918
-turn -9.0
-forwards, 0.0156918
-turn -9.0
-forwards, 1.4, plough
-turn -9.0
-forwards, 0.0156918
-turn -9.0
-forwards, 0.0156918
-turn -9.0
-forwards, 0.0156918
-turn -9.0
-forwards, 0.0156918
-turn -9.0
-forwards, 0.0156918
-turn -9.0
-forwards, 0.0156918
-turn -9.0
-forwards, 0.0156918
-turn -9.0
-forwards, 0.0156918
-turn -9.0
-forwards, 0.0156918
-turn -9.0
-forwards, 0.0156918
-turn -9.0
-forwards, 1.4, plough
+turn, 55.4
+forwards, 2.300, Plough
+turn, 25.4
+forwards, 1.050, Plough
+turn, -6.0
+forwards, 0.047075, Plough
+turn, -6.0
+forwards, 0.047075, Plough
+turn, -6.0
+forwards, 0.047075, Plough
+turn, -6.0
+forwards, 0.047075, Plough
+turn, -6.0
+forwards, 0.047075, Plough
+turn, -6.0
+forwards, 0.047075, Plough
+turn, -6.0
+forwards, 0.047075, Plough
+turn, -6.0
+forwards, 0.047075, Plough
+turn, -6.0
+forwards, 0.047075, Plough
+turn, -6.0
+forwards, 0.047075, Plough
+turn, -6.0
+forwards, 1.400, Plough
+turn, -6.0
+forwards, 0.047075, Plough
+turn, -6.0
+forwards, 0.047075, Plough
+turn, -6.0
+forwards, 0.047075, Plough
+turn, -6.0
+forwards, 0.047075, Plough
+turn, -6.0
+forwards, 0.047075, Plough
+turn, -6.0
+forwards, 0.047075, Plough
+turn, -6.0
+forwards, 0.047075, Plough
+turn, -6.0
+forwards, 0.047075, Plough
+turn, -6.0
+forwards, 0.047075, Plough
+turn, -6.0
+forwards, 0.047075, Plough
+turn, -6.0
+forwards, 1.450, Plough
+turn, -6.0
+forwards, 0.047075, Plough
+turn, -6.0
+forwards, 0.047075, Plough
+turn, -6.0
+forwards, 0.047075, Plough
+turn, -6.0
+forwards, 0.047075, Plough
+turn, -6.0
+forwards, 0.047075, Plough
+turn, -6.0
+forwards, 0.047075, Plough
+turn, -6.0
+forwards, 0.047075, Plough
+turn, -6.0
+forwards, 0.047075, Plough
+turn, -6.0
+forwards, 0.047075, Plough
+turn, -6.0
+forwards, 0.047075, Plough
+turn, -6.0
+forwards, 1.700, Plough
+turn, 44.2
+forwards, 2.3, Plough
