@@ -1,4 +1,4 @@
-set_position_center
+//set_position_center
 bearing, 120
 forwards, 4.1, Plough
 turn -9.0

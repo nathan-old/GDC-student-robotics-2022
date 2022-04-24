@@ -2,7 +2,7 @@
 // Sweeps cans from the left side of the robot into the plow and brings back to score zone
 // Should start at a angle of 15 (relative to something idk)
 print, [INFO] Starting left sweep
-set_position_center
+//set_position_center
 bearing, 14
 forwards, 2.651012, Plough
 
