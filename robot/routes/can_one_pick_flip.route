@@ -1,3 +1,4 @@
+print, [INFO] Starting can_one pick flip
 forwards, 1.65, Plough
 turn, 90
 forwards, -0.20, Plough
@@ -11,4 +12,5 @@ forwards, 0.30, Plough
 turn, 80
 forwards, 1.75, Plough
 forwards, -0.25, Plough
-bearing
+beep, 5
+print, [INFO] Finished can_one pick flip

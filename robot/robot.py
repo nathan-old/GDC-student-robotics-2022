@@ -16,10 +16,9 @@ RobotInfo_Enable = True
 Instructions_Enable = True
 PathFinder_Enable = False
 Grabber_Enable = True
-Set_Bearing_Enable = False
-Goto_Set_Position = False
-Set_Position = (50, 50)  # X, Y (In mm)
-route_paths = ["routes/can_one_pick_flip.route"]#, "routes/route.txt"]
+Set_Bearing_Enable = True
+route_paths = ["routes/can_one_pick_flip.route",
+               "routes/left_sweep.route", "routes/right_sweep.route"]
 # Should we create a debug log even when the calculated position is None?
 debug_log_even_with_no_pos = True
 
@@ -76,13 +75,17 @@ class RobotController():
         else:
             print("[INFO][UPDATER] Photos folder already exists")
         image_index = 0
+        print("[INFO][UPDATER] Saving aggregated route to {}/total_route.route".format(debug_folder_path))
+        with open("{}/total_route.route".format(debug_folder_path), "w") as total_route_file:
+            for instruction in self.route_commands.route:
+                total_route_file.write(','.join(instruction) + "\n")
         while True:
             self.robot.camera.save(image_folder_path + "/" +
                                    str(image_index) + '.png')
             image_index += 1
             try_calc_pos = None
             if not self.position_finder.block:
-                try_calc_pos = self.position_finder.get_pos() 
+                try_calc_pos = self.position_finder.get_pos()
             if try_calc_pos or debug_log_even_with_no_pos:
                 is_moving = self.movement_controller.moving
                 with open(debug_folder_path + "/" + str(time.time()) + '-debug.json', "w") as debug_file:
@@ -141,7 +144,7 @@ class RobotController():
 
     def after_button(self):
         if self.set_bearing:
-            self.set_bearing(self.start_beraing())
+            self.call_set_bearing(self.start_bearing(), tries=1)
 
         if self.use_pathfinder:
             for i in range(3):
@@ -174,8 +177,9 @@ class RobotController():
     def get_position(self):
         return self.movement_controller.pos_get(self.position_finder)
 
-    def set_bearing(self, bearing):
-        self.movement_controller.set_bearing(self.position_finder, target=bearing)
+    def call_set_bearing(self, bearing, tries=3):
+        self.movement_controller.set_bearing(
+            self.position_finder, target=bearing, tries=tries)
 
 
 def run():
@@ -185,8 +189,8 @@ def run():
     R = Robot(auto_start=True, verbose=True,
               ignored_ruggeduinos=[RUGGEDUINO_ID])
     com = Communicate(arduino.Start(R, RUGGEDUINO_ID))
-    position_finder = Position(R)
     movement = MovementMaster(R)
+    position_finder = Position(R, movement)
     routecommands = RouteCommands(
         R, movement, Grabber_Enable, com, position_finder)
     # Create the robot controller class

@@ -7,7 +7,7 @@ import utils
 class MovementMaster():
     def __init__(self, robot):
         ''' Robot dimension constants'''
-        print('[INITI] Movement Master initialised')
+        print('[INIT] Movement Master initialised')
         R = robot
         self.R = robot
         self.arm_radius = 0.25
@@ -159,7 +159,7 @@ class MovementMaster():
             position = self.pos_get(position_finder)
             if position is None:
                 print(
-                    "Did not find position on set bearing iteration {}/{}, retrying".format(i, tries))
+                    "Did not find position on set bearing iteration {}/{}, retrying".format(i + 1, tries))
                 continue
 
             turn_angle = target_bearing - position[1]
@@ -216,9 +216,15 @@ class RouteCommands():
                     self.movement.forwards(float(i[1]), front)  # [2,0]
                 elif i[0] == 'bearing':
                     print("Running set bearing")
+                    if len(i) == 2:
+                        self.movement.set_bearing(self.position_finder, target=int(i[1]))
+                    else:
+                        self.movement.set_bearing(self.position_finder)
                 elif i[0] == 'beep':
                     print("Beeping (D6, {} seccond(s))".format(i[1]))
                     self.R.power_board.piezo.buzz(float(i[1]), Note.D6)
+                    if len(i) == 3:
+                        time.sleep(float(i[1]))
                 elif i[0] == 'turn':
                     self.movement.rotate(float(i[1]), 0.3)
                 elif i[0] == 'sleep':
@@ -243,6 +249,8 @@ class RouteCommands():
                         front = [2, 1, 0]
                     self.movement.sideways(float(i[1]), front)  # 2,1,0
                     self.movement.set_bearing(self.position_finder)
+                elif i[0] == "print":
+                    print(i[1])
                 elif i[0] == '//':
                     print('[WARN] Commented instruction on line ' +
                           str(route.index(i)+1) + ' -- skipping')
