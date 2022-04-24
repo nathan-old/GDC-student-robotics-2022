@@ -11,7 +11,8 @@ int Pos = 100;
 int PosGrab = 0;
 int PosFlip = 0;
 
-void setup() {
+void setup()
+{
   Serial.begin(9600);
   pinMode(buttonPin, INPUT);
   Flip.attach(FlipPin);
@@ -20,46 +21,57 @@ void setup() {
   Flip.write(7);
 }
 
-int calibrate() {
-  for (PosGrab = 40; PosGrab >= 0; PosGrab -= 1) { 
+int calibrate()
+{
+  for (PosGrab = 40; PosGrab >= 0; PosGrab -= 1)
+  {
     Grab.write(PosGrab);
     buttonState = digitalRead(buttonPin);
-    if  (buttonState == HIGH) {
+    if (buttonState == HIGH)
+    {
       Serial.println("AAA");
       return (PosGrab);
       break;
     }
-   delay(30);
+    delay(30);
   }
 }
 
-void FlipCan(int startPoint, int endPoint, int stepSize) {
-  for (PosFlip = startPoint; PosFlip == endPoint; PosFlip -= stepSize) { 
+void FlipCan(int startPoint, int endPoint, int stepSize)
+{
+  for (PosFlip = startPoint; PosFlip == endPoint; PosFlip -= stepSize)
+  {
     Flip.write(PosFlip);
     delay(15);
   }
 }
 
-void GrabCan() {
-  Grab.write(Pos+70);
+void GrabCan()
+{
+  Grab.write(Pos + 70);
   delay(200);
-  for (PosFlip = 7; PosFlip <= 180; PosFlip += 2) { 
+  for (PosFlip = 7; PosFlip <= 180; PosFlip += 2)
+  {
     Flip.write(PosFlip);
     delay(10);
   }
   Pos = calibrate();
   Grab.write(Pos);
-  for (PosFlip = 180; PosFlip >= 7; PosFlip -= 2) { 
+  for (PosFlip = 180; PosFlip >= 7; PosFlip -= 2)
+  {
     Flip.write(PosFlip);
     delay(10);
   }
 }
 
-void loop() {
-  if (Serial.available())  {
-    char c = Serial.read();  //gets one byte from serial buffer
-    if (c == 'A') {
+void loop()
+{
+  if (Serial.available())
+  {
+    char c = Serial.read(); // gets one byte from serial buffer
+    if (c == 'A')
+    {
       GrabCan();
-     }
+    }
   }
 }

@@ -4,14 +4,15 @@ from movement import MovementMaster
 
 
 class Position():
-    def __init__(self, R):
+    def __init__(self, R, movement_master):
         self.R = R
-        self.movement = MovementMaster(self.R)
+        self.movement = movement_master
         self.marker_list = [[0, 718.75, 5750], [1, 1437.5, 5750], [2, 2156.25, 5750], [3, 2875, 5750], [4, 3593.75, 5750], [5, 4312.5, 5750], [6, 5031.25, 5750], [7, 5750, 5031.25], [8, 5750, 4312.5], [9, 5750, 3593.75], [10, 5750, 2875], [11, 5750, 2156.25], [12, 5750, 1437.5], [
             13, 5750, 718.75], [14, 5031.25, 0], [15, 4312.5, 0], [16, 3593.75, 0], [17, 2875, 0], [18, 2156.25, 0], [19, 1437.5, 0], [20, 718.75, 0], [21, 0, 718.75], [22, 0, 1437.5], [23, 0, 2156.25], [24, 0, 2875], [25, 0, 3593.75], [26, 0, 4312.5], [27, 0, 5031.25]]
         self.data_array = []
         self.turn_angle = 10
-        self.index = 0 
+        self.index = 0
+        self.block = False
         print('[INIT] Position finder initialised')
 
     def get_intersections(self, x0, y0, r0, x1, y1, r1):
@@ -96,12 +97,10 @@ class Position():
         else:
             return None
 
-    def get_angle(self):
-        '''Return the angle of robot'''
-        pass # TODO: Robert IMPLEMENT THIS <<<<
-
     def try_untill_find(self):
         '''Try to find a valid location untill one is found'''
+        print("[INFO] Starting try_untill_find")
+        self.block = True
         position = self.get_pos()
         rotation = 0
         while position == None:
@@ -111,4 +110,5 @@ class Position():
             rotation += self.turn_angle
             self.movement.rotate(self.turn_angle, 0.3)
             time.sleep(0.2)
+        self.block = False
         return position

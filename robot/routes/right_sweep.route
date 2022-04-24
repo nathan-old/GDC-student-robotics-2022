@@ -1,0 +1,70 @@
+// RIGHT SWEEP
+// Sweeps cans from the right side of the robot into the plow and brings back to score zone
+// Should start at a angle of 15 (relative to something idk)
+
+print, [INFO] Starting right sweep
+bearing
+
+forwards, 2.651012, Plough
+
+turn, -2.5
+forwards, 0.031592, Plough
+turn, -5
+forwards, 0.031592, Plough
+turn, -5
+forwards, 0.031592, Plough
+turn, -5
+forwards, 0.031592, Plough
+turn, -5
+forwards, 0.031592, Plough
+turn, -5
+forwards, 0.031592, Plough
+turn, -5
+forwards, 0.031592, Plough
+turn, -5
+forwards, 0.031592, Plough
+turn, -5
+forwards, 0.031592, Plough
+turn, -2.5
+
+forwards, 0.13, Plough
+
+turn, -5
+forwards, 0.052293, Plough
+turn, -10
+forwards, 0.052293, Plough
+turn, -10
+forwards, 0.052293, Plough
+turn, -10
+forwards, 0.052293, Plough
+turn, -10
+forwards, 0.052293, Plough
+turn, -10
+forwards, 0.052293, Plough
+turn, -10
+forwards, 0.052293, Plough
+turn, -10
+forwards, 0.052293, Plough
+turn, -5
+
+forwards, 1.15, Plough
+
+turn, -2.5
+forwards, 0.039027, Plough
+turn, -5
+forwards, 0.039027, Plough
+turn, -5
+forwards, 0.039027, Plough
+turn, -5
+forwards, 0.039027, Plough
+turn, -5
+forwards, 0.039027, Plough
+turn, -5
+forwards, 0.039027, Plough
+turn, -4.2
+forwards, 0.038781, Plough
+turn, -0.263
+
+forwards, 1.74232, Plough
+beep, 5
+print, [INFO] Finished right sweep
