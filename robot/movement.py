@@ -152,7 +152,7 @@ class MovementMaster():
 
     def set_bearing(self, position_finder, tries=3, target=None):
         target_bearing = utils.calc_target_bearing(
-            self.R) if not target else utils.bearing_of_zero_for_zones() + target
+            self.R) if not target else utils.bearing_of_zero_for_zones(self.R.zone) + target
         if target_bearing > 360:
             target_bearing -= 360
         if target_bearing < 0:
@@ -169,6 +169,40 @@ class MovementMaster():
             turn_angle = target_bearing - position[1]
             self.rotate(turn_angle, 0.3)
             break
+    
+    def set_position_center(self, position_finder):
+        print("[INFO] Starting set position center")
+        for i in range(3):
+            start_pos = self.pos_get(position_finder)
+            if start_pos is None:
+                continue
+            print("[INFO] Set position center found pos: {}".format(start_pos))
+            end_pos = []
+            start_zone = self.R.zone
+            if start_zone == 0:
+                end_pos = [0.5,5.25]
+            elif start_zone == 1:
+                end_pos = [5.25,5.25]
+            elif start_zone == 2:
+                end_pos = [5.25,0.5]
+            else:
+                end_pos = [0.5,0.5]
+            
+            print("Selected start position of {} (corner center) based on start zone of: {}".format(start_pos, self.R.zone))
+            
+            x_change = end_pos[0] - start_pos[0][0]
+            y_change = end_pos[1] - start_pos[0][1]
+            print("[INFO] X change: {}, Y change: {}".format(x_change, y_change))
+            distance = math.sqrt((x_change**2)+(y_change**2))
+            target_bearing = math.atan2(x_change,y_change)
+            print("[INFO] Calculated distance of {} with target bearing of {} from x,y delta".foramt(distance, target_bearing))
+            turn_angle = target_bearing - start_pos[1]
+            print("[INFO] turn angle: {}".format(turn_angle))
+            self.rotate(turn_angle, 0.3)
+            self.forwards(distance)
+            break
+        print("[INFO] Exiting from set position center")
+
 
 class RouteCommands():
     def __init__(self, R, movement, Grabber_Enable, com, position_finder):
@@ -223,6 +257,9 @@ class RouteCommands():
                         self.movement.set_bearing(self.position_finder, target=float(i[1]))
                     else:
                         self.movement.set_bearing(self.position_finder)
+                elif i[0] == "set_position_center":
+                    print("Running set position center")
+                    self.movement.set_position_center(self.position_finder)
                 elif i[0] == 'beep':
                     print("Beeping (D6, {} seccond(s))".format(i[1]))
                     self.R.power_board.piezo.buzz(float(i[1]), Note.D6)

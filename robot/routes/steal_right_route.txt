@@ -1,3 +1,4 @@
+set_position_center
 turn, -120
 forwards, 2.746034, empty
 turn, 90
