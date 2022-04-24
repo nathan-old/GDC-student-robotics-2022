@@ -3,7 +3,7 @@
 // Should start at a angle of 15 (relative to something idk)
 
 print, [INFO] Starting right sweep
-bearing
+bearing, 75
 
 forwards, 2.651012, Plough
 

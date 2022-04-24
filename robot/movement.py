@@ -152,7 +152,7 @@ class MovementMaster():
 
     def set_bearing(self, position_finder, tries=3, target=None):
         target_bearing = utils.calc_target_bearing(
-            self.R) if not target else target
+            self.R) if not target else utils.bearing_of_zero_for_zones() + target
         print("[INFO] (movement controller) set bearing, target bearing: {}".format(
             target_bearing))
         for i in range(tries):

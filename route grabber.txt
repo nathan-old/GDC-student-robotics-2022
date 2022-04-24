@@ -1,3 +1,6 @@
+from turtle import forward
+
+
 forwards, 1.65, Plough
 turn, 90
 forwards, -0.20, Plough
@@ -10,6 +13,31 @@ forwards, 0.30, Plough
 turn, 90
 forwards, 1.75, Plough
 forwards, -0.20, Plough
-turn, 180
+turn, 150
+forwards, 2.5, Plough
+turn, 90
+forwards, -0.20, Plough
+turn, -125
+forwards, 0.20
+grab, 0
+forwards, -0.20, Grabber
+turn, 125
+forwards, 0.30, Plough
+turn, 90
+forwards, 2.4, Plough
+forwards, -0.20, Plough
+turn, -120
+forwards, 2.5, Plough
+turn, 90
+forwards, -0.20, Plough
+turn, -125
+forwards, 0.20
+grab, 0
+forwards, -0.20, Grabber
+turn, 125
+forwards, 0.30, Plough
+turn, 90
+forwards, 2.4, Plough
+forwards, -0.20, Plough
 
 

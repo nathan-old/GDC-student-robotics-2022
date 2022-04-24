@@ -1,4 +1,5 @@
 print, [INFO] Starting can_one pick flip
+bearing, 45
 forwards, 1.65, Plough
 turn, 90
 forwards, -0.20, Plough
