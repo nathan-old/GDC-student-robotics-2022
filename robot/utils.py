@@ -9,10 +9,10 @@ def calc_target_bearing(robot):
         return 15
 def bearing_of_zero_for_zones(zone):
     if int(zone) == 0:
-        return 90
+        return 90+120
     elif int(zone) == 1:
-        return 180
+        return 180+120
     elif int(zone) == 2:
-        return 270
+        return 270+120
     elif int(zone) == 3:
-        return 0
+        return 0+120
