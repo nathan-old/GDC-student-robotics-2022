@@ -1,3 +1,19 @@
+forwards, 1.65, Plough
+turn, 90
+forwards, -0.20, Plough
+turn, -125
+forwards, 0.20
+grab, 0
+forwards, -0.20, Grabber
+turn, 125
+forwards, 0.30, Plough
+turn, 90
+forwards, 1.75, Plough
+forwards, -0.25, Plough
+
+bearing, 195
+
+
 forwards, 2.651012, Plough
 
 turn, 2.5
@@ -20,7 +36,7 @@ turn, 5
 forwards, 0.031592, Plough
 turn, 2.5
 
-forwards, 0.12, Plough
+forwards, 0.13, Plough
 
 turn, 5
 forwards, 0.052293, Plough
@@ -89,7 +105,7 @@ turn, -5
 forwards, 0.031592, Plough
 turn, -2.5
 
-forwards, 0.12, Plough
+forwards, 0.13, Plough
 
 turn, -5
 forwards, 0.052293, Plough
@@ -106,7 +122,6 @@ forwards, 0.052293, Plough
 turn, -10
 forwards, 0.052293, Plough
 turn, -10
-
 forwards, 0.052293, Plough
 turn, -5
 
@@ -124,10 +139,6 @@ turn, -5
 forwards, 0.039027, Plough
 turn, -5
 forwards, 0.039027, Plough
-turn, -5
-forwards, 0.039027, Plough
-turn, -5
-forwards, 0.038996, Plough
 turn, -4.2
 forwards, 0.038781, Plough
 turn, -0.263
