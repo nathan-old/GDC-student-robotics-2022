@@ -1,0 +1,72 @@
+turn, 55.4
+forwards, 2.400, Plough
+turn, 36.4
+forwards, 1.100, Plough
+turn -9.0
+forwards, 0.047075, Plough
+turn -9.0
+forwards, 0.047075, Plough
+turn -9.0
+forwards, 0.047075, Plough
+turn -9.0
+forwards, 0.047075, Plough
+turn -9.0
+forwards, 0.047075, Plough
+turn -9.0
+forwards, 0.047075, Plough
+turn -9.0
+forwards, 0.047075, Plough
+turn -9.0
+forwards, 0.047075, Plough
+turn -9.0
+forwards, 0.047075, Plough
+turn -9.0
+forwards, 0.047075, Plough
+turn -9.0
+forwards, 1.400, Plough
+turn -9.0
+forwards, 0.047075, Plough
+turn -9.0
+forwards, 0.047075, Plough
+turn -9.0
+forwards, 0.047075, Plough
+turn -9.0
+forwards, 0.047075, Plough
+turn -9.0
+forwards, 0.047075, Plough
+turn -9.0
+forwards, 0.047075, Plough
+turn -9.0
+forwards, 0.047075, Plough
+turn -9.0
+forwards, 0.047075, Plough
+turn -9.0
+forwards, 0.047075, Plough
+turn -9.0
+forwards, 0.047075, Plough
+turn -9.0
+forwards, 1.400, Plough
+turn -9.0
+forwards, 0.047075, Plough
+turn -9.0
+forwards, 0.047075, Plough
+turn -9.0
+forwards, 0.047075, Plough
+turn -9.0
+forwards, 0.047075, Plough
+turn -9.0
+forwards, 0.047075, Plough
+turn -9.0
+forwards, 0.047075, Plough
+turn -9.0
+forwards, 0.047075, Plough
+turn -9.0
+forwards, 0.047075, Plough
+turn -9.0
+forwards, 0.047075, Plough
+turn -9.0
+forwards, 0.047075, Plough
+turn -9.0
+forwards, 1.700, Plough
+turn, 45.2
+forwards, 1.936578, Plough

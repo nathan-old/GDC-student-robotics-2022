@@ -1,0 +1,17 @@
+turn, -120
+forwards, 2.746034, empty
+turn, 90
+forwards, 0.483796, empty
+forwards, -0.0483796, empty
+turn, -90
+forwards, 0.4, empty
+turn, 90
+forwards, 0.483796, empty
+forwards, -0.0483796, empty
+turn, -90
+forwards, 0.4, empty
+turn, 90
+forwards, 0.483796, empty
+forwards, -0.0483796, empty
+turn, 90
+forwards, 3.5460334, empty
