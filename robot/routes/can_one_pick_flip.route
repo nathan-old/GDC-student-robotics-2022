@@ -1,4 +1,5 @@
 print, [INFO] Starting can_one pick flip
+set_position_center
 bearing, 45
 forwards, 1.65, Plough
 turn, 90
