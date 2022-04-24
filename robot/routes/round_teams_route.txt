@@ -1,5 +1,4 @@
-bearing, 120
-turn, 55.4
+bearing, 55
 forwards, 2.300, Plough
 turn, 25.4
 forwards, 1.050, Plough
