@@ -1,1 +1,318 @@
-[{"calculated_position": null, "is_moving": false, "timestamp": 1628260879.8704646, "current_route_step_command": "not started route yet", "current_route_step_index": -1}, {"calculated_position": null, "is_moving": false, "timestamp": 1628260881.6361132, "current_route_step_command": "not started route yet", "current_route_step_index": -1}, {"calculated_position": null, "is_moving": false, "timestamp": 1628260883.4699502, "current_route_step_command": "not started route yet", "current_route_step_index": -1}, {"calculated_position": null, "is_moving": false, "timestamp": 1628260888.5882185, "current_route_step_command": "not started route yet", "current_route_step_index": -1}, {"calculated_position": null, "is_moving": false, "timestamp": 1628260890.346334, "current_route_step_command": "not started route yet", "current_route_step_index": -1}, {"calculated_position": null, "is_moving": false, "timestamp": 1628260892.0892086, "current_route_step_command": "not started route yet", "current_route_step_index": -1}, {"calculated_position": null, "is_moving": false, "timestamp": 1628260893.8273578, "current_route_step_command": "not started route yet", "current_route_step_index": -1}, {"calculated_position": null, "is_moving": false, "timestamp": 1628260895.5768247, "current_route_step_command": "not started route yet", "current_route_step_index": -1}, {"calculated_position": null, "is_moving": false, "timestamp": 1628260897.3308573, "current_route_step_command": "not started route yet", "current_route_step_index": -1}, {"calculated_position": null, "is_moving": false, "timestamp": 1628260899.0804424, "current_route_step_command": "not started route yet", "current_route_step_index": -1}, {"calculated_position": null, "is_moving": false, "timestamp": 1628260900.9163358, "current_route_step_command": "not started route yet", "current_route_step_index": -1}, {"calculated_position": null, "is_moving": false, "timestamp": 1628260902.9471612, "current_route_step_command": "not started route yet", "current_route_step_index": -1}, {"calculated_position": null, "is_moving": false, "timestamp": 1628260904.8640943, "current_route_step_command": "not started route yet", "current_route_step_index": -1}, {"calculated_position": null, "is_moving": false, "timestamp": 1628260907.2919507, "current_route_step_command": "not started route yet", "current_route_step_index": -1}, {"calculated_position": null, "is_moving": true, "timestamp": 1628260909.4399865, "current_route_step_command": ["forwards", "1.65", "Plough\n"], "current_route_step_index": 0}, {"calculated_position": null, "is_moving": true, "timestamp": 1628260911.6058288, "current_route_step_command": ["turn", "90\n"], "current_route_step_index": 1}, {"calculated_position": null, "is_moving": true, "timestamp": 1628260916.8116915, "current_route_step_command": ["turn", "-125\n"], "current_route_step_index": 3}, {"calculated_position": null, "is_moving": false, "timestamp": 1628260918.9758885, "current_route_step_command": ["grab", "0\n"], "current_route_step_index": 5}, {"calculated_position": null, "is_moving": false, "timestamp": 1628260921.256717, "current_route_step_command": ["grab", "0\n"], "current_route_step_index": 5}, {"calculated_position": null, "is_moving": true, "timestamp": 1628260923.410948, "current_route_step_command": ["turn", "125\n"], "current_route_step_index": 7}, {"calculated_position": null, "is_moving": true, "timestamp": 1628260925.7023487, "current_route_step_command": ["turn", "125\n"], "current_route_step_index": 7}, {"calculated_position": null, "is_moving": true, "timestamp": 1628260927.8428407, "current_route_step_command": ["turn", "80\n"], "current_route_step_index": 9}, {"calculated_position": null, "is_moving": true, "timestamp": 1628260929.9635484, "current_route_step_command": ["forwards", "1.75", "Plough\n"], "current_route_step_index": 10}, {"calculated_position": null, "is_moving": false, "timestamp": 1628260931.9925861, "current_route_step_command": ["forwards", "-0.25", "Plough"], "current_route_step_index": 11}, {"calculated_position": null, "is_moving": true, "timestamp": 1628260937.8821845, "current_route_step_command": ["forwards", "0.031592", "Plough\n"], "current_route_step_index": 19}, {"calculated_position": null, "is_moving": true, "timestamp": 1628260939.9158535, "current_route_step_command": ["forwards", "0.031592", "Plough\n"], "current_route_step_index": 33}, {"calculated_position": null, "is_moving": true, "timestamp": 1628260942.0425882, "current_route_step_command": ["forwards", "0.052293", "Plough\n"], "current_route_step_index": 41}, {"calculated_position": null, "is_moving": false, "timestamp": 1628260944.2136903, "current_route_step_command": ["forwards", "0.052293", "Plough\n"], "current_route_step_index": 51}, {"calculated_position": null, "is_moving": true, "timestamp": 1628260946.2378364, "current_route_step_command": ["forwards", "0.052293", "Plough\n"], "current_route_step_index": 51}, {"calculated_position": null, "is_moving": false, "timestamp": 1628260948.5290933, "current_route_step_command": ["forwards", "0.039027", "Plough\n"], "current_route_step_index": 67}, {"calculated_position": null, "is_moving": true, "timestamp": 1628260950.5304456, "current_route_step_command": ["forwards", "0.039027", "Plough\n"], "current_route_step_index": 67}, {"calculated_position": null, "is_moving": true, "timestamp": 1628260952.9435976, "current_route_step_command": ["turn", "4.2\n"], "current_route_step_index": 70}, {"calculated_position": null, "is_moving": true, "timestamp": 1628260955.106685, "current_route_step_command": ["forwards", "0.038781", "Plough\n"], "current_route_step_index": 71}, {"calculated_position": null, "is_moving": false, "timestamp": 1628260957.2240689, "current_route_step_command": ["\n"], "current_route_step_index": 73}, {"calculated_position": null, "is_moving": true, "timestamp": 1628260962.4651952, "current_route_step_command": ["forwards", "-0.2", "Plough\n"], "current_route_step_index": 80}, {"calculated_position": null, "is_moving": true, "timestamp": 1628260964.5007303, "current_route_step_command": ["forwards", "0.031592", "Plough\n"], "current_route_step_index": 93}, {"calculated_position": null, "is_moving": true, "timestamp": 1628260966.4813182, "current_route_step_command": ["forwards", "0.031592", "Plough\n"], "current_route_step_index": 101}, {"calculated_position": null, "is_moving": false, "timestamp": 1628260968.6586714, "current_route_step_command": ["forwards", "0.052293", "Plough\n"], "current_route_step_index": 111}, {"calculated_position": null, "is_moving": true, "timestamp": 1628260970.802344, "current_route_step_command": ["forwards", "0.052293", "Plough\n"], "current_route_step_index": 111}, {"calculated_position": null, "is_moving": false, "timestamp": 1628260978.5743175, "current_route_step_command": ["turn", "-2.5\n"], "current_route_step_index": 128}, {"calculated_position": null, "is_moving": false, "timestamp": 1628260980.6010475, "current_route_step_command": ["turn", "-2.5\n"], "current_route_step_index": 128}, {"calculated_position": null, "is_moving": false, "timestamp": 1628260982.6303058, "current_route_step_command": ["turn", "-2.5\n"], "current_route_step_index": 128}, {"calculated_position": null, "is_moving": false, "timestamp": 1628260984.1865907, "current_route_step_command": ["turn", "-2.5\n"], "current_route_step_index": 128}, {"calculated_position": null, "is_moving": false, "timestamp": 1628260986.339307, "current_route_step_command": ["turn", "-2.5\n"], "current_route_step_index": 128}, {"calculated_position": null, "is_moving": false, "timestamp": 1628260988.1172843, "current_route_step_command": ["turn", "-2.5\n"], "current_route_step_index": 128}, {"calculated_position": null, "is_moving": false, "timestamp": 1628260989.9947035, "current_route_step_command": ["turn", "-2.5\n"], "current_route_step_index": 128}, {"calculated_position": null, "is_moving": false, "timestamp": 1628260992.0150645, "current_route_step_command": ["turn", "-2.5\n"], "current_route_step_index": 128}, {"calculated_position": null, "is_moving": false, "timestamp": 1628260994.029189, "current_route_step_command": ["turn", "-2.5\n"], "current_route_step_index": 128}, {"calculated_position": null, "is_moving": false, "timestamp": 1628260996.1501722, "current_route_step_command": ["turn", "-2.5\n"], "current_route_step_index": 128}, {"calculated_position": null, "is_moving": false, "timestamp": 1628260998.306318, "current_route_step_command": ["turn", "-2.5\n"], "current_route_step_index": 128}, {"calculated_position": null, "is_moving": false, "timestamp": 1628261004.614189, "current_route_step_command": ["turn", "-2.5\n"], "current_route_step_index": 128}, {"calculated_position": null, "is_moving": false, "timestamp": 1628261006.5387373, "current_route_step_command": ["turn", "-2.5\n"], "current_route_step_index": 128}, {"calculated_position": null, "is_moving": false, "timestamp": 1628261008.3590286, "current_route_step_command": ["turn", "-2.5\n"], "current_route_step_index": 128}, {"calculated_position": null, "is_moving": false, "timestamp": 1628261010.1044497, "current_route_step_command": ["turn", "-2.5\n"], "current_route_step_index": 128}, {"calculated_position": null, "is_moving": false, "timestamp": 1628261012.1274755, "current_route_step_command": ["turn", "-2.5\n"], "current_route_step_index": 128}, {"calculated_position": null, "is_moving": false, "timestamp": 1628261014.212097, "current_route_step_command": ["turn", "-2.5\n"], "current_route_step_index": 128}, {"calculated_position": null, "is_moving": false, "timestamp": 1628261015.8810513, "current_route_step_command": ["turn", "-2.5\n"], "current_route_step_index": 128}, {"calculated_position": null, "is_moving": false, "timestamp": 1628261017.7618532, "current_route_step_command": ["turn", "-2.5\n"], "current_route_step_index": 128}, {"calculated_position": null, "is_moving": false, "timestamp": 1628261019.675728, "current_route_step_command": ["turn", "-2.5\n"], "current_route_step_index": 128}, {"calculated_position": null, "is_moving": false, "timestamp": 1628261021.7070808, "current_route_step_command": ["turn", "-2.5\n"], "current_route_step_index": 128}]
+[
+    {
+        "calculated_position": null,
+        "is_moving": false,
+        "timestamp": 1628260883.060431,
+        "current_route_step_command": "not started route yet",
+        "current_route_step_index": -1
+    },
+    {
+        "calculated_position": null,
+        "is_moving": false,
+        "timestamp": 1628260888.2865252,
+        "current_route_step_command": "not started route yet",
+        "current_route_step_index": -1
+    },
+    {
+        "calculated_position": null,
+        "is_moving": false,
+        "timestamp": 1628260893.6443787,
+        "current_route_step_command": "not started route yet",
+        "current_route_step_index": -1
+    },
+    {
+        "calculated_position": null,
+        "is_moving": false,
+        "timestamp": 1628260898.9096572,
+        "current_route_step_command": "not started route yet",
+        "current_route_step_index": -1
+    },
+    {
+        "calculated_position": null,
+        "is_moving": false,
+        "timestamp": 1628260904.1246605,
+        "current_route_step_command": "not started route yet",
+        "current_route_step_index": -1
+    },
+    {
+        "calculated_position": null,
+        "is_moving": false,
+        "timestamp": 1628260911.5055988,
+        "current_route_step_command": "not started route yet",
+        "current_route_step_index": -1
+    },
+    {
+        "calculated_position": null,
+        "is_moving": false,
+        "timestamp": 1628260916.6095767,
+        "current_route_step_command": "not started route yet",
+        "current_route_step_index": -1
+    },
+    {
+        "calculated_position": null,
+        "is_moving": false,
+        "timestamp": 1628260922.3228066,
+        "current_route_step_command": "not started route yet",
+        "current_route_step_index": -1
+    },
+    {
+        "calculated_position": null,
+        "is_moving": false,
+        "timestamp": 1628260927.3576374,
+        "current_route_step_command": "not started route yet",
+        "current_route_step_index": -1
+    },
+    {
+        "calculated_position": null,
+        "is_moving": false,
+        "timestamp": 1628260933.2591624,
+        "current_route_step_command": "not started route yet",
+        "current_route_step_index": -1
+    },
+    {
+        "calculated_position": null,
+        "is_moving": false,
+        "timestamp": 1628260940.268642,
+        "current_route_step_command": "not started route yet",
+        "current_route_step_index": -1
+    },
+    {
+        "calculated_position": null,
+        "is_moving": false,
+        "timestamp": 1628260946.1816669,
+        "current_route_step_command": "not started route yet",
+        "current_route_step_index": -1
+    },
+    {
+        "calculated_position": null,
+        "is_moving": false,
+        "timestamp": 1628260951.2640622,
+        "current_route_step_command": "not started route yet",
+        "current_route_step_index": -1
+    },
+    {
+        "calculated_position": null,
+        "is_moving": false,
+        "timestamp": 1628260957.314565,
+        "current_route_step_command": "not started route yet",
+        "current_route_step_index": -1
+    },
+    {
+        "calculated_position": null,
+        "is_moving": false,
+        "timestamp": 1628260962.019962,
+        "current_route_step_command": "not started route yet",
+        "current_route_step_index": -1
+    },
+    {
+        "calculated_position": null,
+        "is_moving": false,
+        "timestamp": 1628260966.7225235,
+        "current_route_step_command": "not started route yet",
+        "current_route_step_index": -1
+    },
+    {
+        "calculated_position": null,
+        "is_moving": false,
+        "timestamp": 1628260971.5138075,
+        "current_route_step_command": "not started route yet",
+        "current_route_step_index": -1
+    },
+    {
+        "calculated_position": null,
+        "is_moving": false,
+        "timestamp": 1628260975.2998698,
+        "current_route_step_command": "not started route yet",
+        "current_route_step_index": -1
+    },
+    {
+        "calculated_position": null,
+        "is_moving": false,
+        "timestamp": 1628260978.3853638,
+        "current_route_step_command": "not started route yet",
+        "current_route_step_index": -1
+    },
+    {
+        "calculated_position": null,
+        "is_moving": false,
+        "timestamp": 1628260981.3358061,
+        "current_route_step_command": "not started route yet",
+        "current_route_step_index": -1
+    },
+    {
+        "calculated_position": null,
+        "is_moving": false,
+        "timestamp": 1628260984.865198,
+        "current_route_step_command": "not started route yet",
+        "current_route_step_index": -1
+    },
+    {
+        "calculated_position": null,
+        "is_moving": false,
+        "timestamp": 1628260990.7651045,
+        "current_route_step_command": "not started route yet",
+        "current_route_step_index": -1
+    },
+    {
+        "calculated_position": null,
+        "is_moving": false,
+        "timestamp": 1628260993.9392498,
+        "current_route_step_command": "not started route yet",
+        "current_route_step_index": -1
+    },
+    {
+        "calculated_position": null,
+        "is_moving": false,
+        "timestamp": 1628260997.3187609,
+        "current_route_step_command": "not started route yet",
+        "current_route_step_index": -1
+    },
+    {
+        "calculated_position": null,
+        "is_moving": false,
+        "timestamp": 1628261000.817638,
+        "current_route_step_command": "not started route yet",
+        "current_route_step_index": -1
+    },
+    {
+        "calculated_position": null,
+        "is_moving": false,
+        "timestamp": 1628261005.218555,
+        "current_route_step_command": "not started route yet",
+        "current_route_step_index": -1
+    },
+    {
+        "calculated_position": null,
+        "is_moving": false,
+        "timestamp": 1628261009.9469326,
+        "current_route_step_command": "not started route yet",
+        "current_route_step_index": -1
+    },
+    {
+        "calculated_position": null,
+        "is_moving": false,
+        "timestamp": 1628261013.2705607,
+        "current_route_step_command": "not started route yet",
+        "current_route_step_index": -1
+    },
+    {
+        "calculated_position": null,
+        "is_moving": false,
+        "timestamp": 1628261016.7606547,
+        "current_route_step_command": "not started route yet",
+        "current_route_step_index": -1
+    },
+    {
+        "calculated_position": null,
+        "is_moving": false,
+        "timestamp": 1628261021.2025392,
+        "current_route_step_command": "not started route yet",
+        "current_route_step_index": -1
+    },
+    {
+        "calculated_position": null,
+        "is_moving": false,
+        "timestamp": 1628261024.5514278,
+        "current_route_step_command": "not started route yet",
+        "current_route_step_index": -1
+    },
+    {
+        "calculated_position": null,
+        "is_moving": false,
+        "timestamp": 1628261028.04225,
+        "current_route_step_command": "not started route yet",
+        "current_route_step_index": -1
+    },
+    {
+        "calculated_position": null,
+        "is_moving": false,
+        "timestamp": 1628261031.4256508,
+        "current_route_step_command": "not started route yet",
+        "current_route_step_index": -1
+    },
+    {
+        "calculated_position": null,
+        "is_moving": false,
+        "timestamp": 1628261035.8373504,
+        "current_route_step_command": "not started route yet",
+        "current_route_step_index": -1
+    },
+    {
+        "calculated_position": null,
+        "is_moving": false,
+        "timestamp": 1628261039.2075744,
+        "current_route_step_command": "not started route yet",
+        "current_route_step_index": -1
+    },
+    {
+        "calculated_position": null,
+        "is_moving": true,
+        "timestamp": 1628261042.542852,
+        "current_route_step_command": [
+            "forwards",
+            "1.65",
+            "Plough"
+        ],
+        "current_route_step_index": 3
+    },
+    {
+        "calculated_position": null,
+        "is_moving": true,
+        "timestamp": 1628261045.522811,
+        "current_route_step_command": [
+            "turn",
+            "90"
+        ],
+        "current_route_step_index": 4
+    },
+    {
+        "calculated_position": null,
+        "is_moving": true,
+        "timestamp": 1628261049.568619,
+        "current_route_step_command": [
+            "turn",
+            "-125"
+        ],
+        "current_route_step_index": 6
+    },
+    {
+        "calculated_position": [
+            [
+                4.869731159637736,
+                1.3680087840042972
+            ],
+            22.05414638572802,
+            [
+                9,
+                7,
+                8
+            ]
+        ],
+        "is_moving": false,
+        "timestamp": 1628261053.465153,
+        "current_route_step_command": [
+            "grab"
+        ],
+        "current_route_step_index": 8
+    },
+    {
+        "calculated_position": [
+            [
+                4.16467921076122,
+                1.671968509992837
+            ],
+            90.4611978341196,
+            [
+                12,
+                11
+            ]
+        ],
+        "is_moving": true,
+        "timestamp": 1628261056.8327608,
+        "current_route_step_command": [
+            "turn",
+            "125"
+        ],
+        "current_route_step_index": 11
+    }
+]

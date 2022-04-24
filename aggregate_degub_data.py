@@ -18,6 +18,6 @@ for filename in glob.glob(base_path + '/*.json'):
         print("(Can ignore) Failed to read debug file: {}, got error: {}".format(filename, error))
 
 print("Imported {} debug log entrys".format(len(debug_data)))
-output = json.dumps(debug_data, indent=None)
+output = json.dumps(debug_data, indent=4)
 with open("debug_data.txt", "w") as file:
     file.write(output)

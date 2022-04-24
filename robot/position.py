@@ -63,10 +63,8 @@ class Position():
                         valid_points[1].append(i[1])
             print(str(len(valid_points)) + " valid points")
             if len(valid_points[0]) > 1:
-                print("Enough valid points > 1")
                 avg_x = sum(valid_points[0]) / len(valid_points[0])
                 avg_y = sum(valid_points[1]) / len(valid_points[1])
-                print(avg_x, avg_y)
                 bearing_array = []
                 for i in seen_markers:
                     bearing = math.atan2(
@@ -88,9 +86,7 @@ class Position():
                 elif bearing > 360:
                     bearing -= 360
                 # array of necessary data in order: (coordinates array), bearing, the markers being viewed by the camera
-                self.data_array.append(
-                    [[avg_x/1000, avg_y/1000], bearing, marker_ids])
-                print(avg_x, avg_y, bearing, marker_ids)
+                self.data_array.append([[avg_x/1000, avg_y/1000], bearing, marker_ids])
                 return [[avg_x/1000, avg_y/1000], bearing, marker_ids]
             else:
                 return None

@@ -190,12 +190,13 @@ class MovementMaster():
             
             print("Selected start position of {} (corner center) based on start zone of: {}".format(start_pos, self.R.zone))
             
-            x_change = end_pos[0] - start_pos[0][0]
-            y_change = end_pos[1] - start_pos[0][1]
+            x_change = float(end_pos[0]) - float(start_pos[0][0])
+            y_change = float(end_pos[1]) - float(start_pos[0][1])
+            bearing = float(start_pos[1])
             print("[INFO] X change: {}, Y change: {}".format(x_change, y_change))
             distance = math.sqrt((x_change**2)+(y_change**2))
-            target_bearing = math.atan2(x_change,y_change)
-            print("[INFO] Calculated distance of {} with target bearing of {} from x,y delta".foramt(distance, target_bearing))
+            target_bearing = math.degrees(math.atan2(y_change,x_change)) - bearing
+            print("[INFO] Calculated distance of {} with target bearing of {} from x,y delta".format(distance, target_bearing))
             turn_angle = target_bearing - start_pos[1]
             print("[INFO] turn angle: {}".format(turn_angle))
             self.rotate(turn_angle, 0.3)
@@ -295,6 +296,7 @@ class RouteCommands():
                     print('[WARN] Commented instruction on line ' +
                           str(route.index(i)+1) + ' -- skipping')
             except Exception as e:
-                print("[ERROR] Encountered error running command {} (index {}), error: {}".format(
-                    i, self.current_command_index, e))
+                print("-----------------------------------------------------------------------------------------")
+                print("[ERROR] Encountered error running command {} (index {}), error: {}".format(i, self.current_command_index, e))
+                print("-----------------------------------------------------------------------------------------")
             self.current_command_index += 1
