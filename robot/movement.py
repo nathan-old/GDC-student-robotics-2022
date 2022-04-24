@@ -152,7 +152,7 @@ class MovementMaster():
 
     def set_bearing(self, position_finder, tries=3, target=None):
         target_bearing = utils.calc_target_bearing(
-            self.R) if not target else utils.bearing_of_zero_for_zones() + target
+            self.R) if not target else utils.bearing_of_zero_for_zones(self.R.zone) + target
         print("[INFO] (movement controller) set bearing, target bearing: {}".format(
             target_bearing))
         for i in range(tries):
@@ -216,7 +216,7 @@ class RouteCommands():
                 elif i[0] == 'bearing':
                     print("Running set bearing")
                     if len(i) == 2:
-                        self.movement.set_bearing(self.position_finder, target=int(i[1]))
+                        self.movement.set_bearing(self.position_finder, target=float(i[1]))
                     else:
                         self.movement.set_bearing(self.position_finder)
                 elif i[0] == 'beep':
