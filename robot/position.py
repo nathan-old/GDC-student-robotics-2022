@@ -39,7 +39,7 @@ class Position():
         for marker in markers_input:
             seen_markers.append([math.degrees(marker.spherical.rot_x), math.degrees(
                 marker.spherical.rot_y), marker.spherical.dist, marker.id])
-            print(marker)
+
         print('seen: ' + str(len(seen_markers)) + ' markers')
         if len(seen_markers) > 1:
             marker_ids = [x[3] for x in seen_markers]

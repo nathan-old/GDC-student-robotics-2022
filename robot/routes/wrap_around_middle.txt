@@ -1,3 +1,4 @@
+set_position_center
 turn, 55.4
 forwards, 2.400, Plough
 turn, 36.4
