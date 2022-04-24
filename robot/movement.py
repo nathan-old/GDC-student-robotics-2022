@@ -178,7 +178,7 @@ class MovementMaster():
                 continue
             print("[INFO] Set position center found pos: {}".format(start_pos))
             end_pos = []
-            start_zone = 2 #self.R.zone
+            start_zone = self.R.zone
             if start_zone == 0:
                 end_pos = [0.5,5.25]
             elif start_zone == 1:

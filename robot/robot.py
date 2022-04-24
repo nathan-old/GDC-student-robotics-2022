@@ -18,7 +18,7 @@ PathFinder_Enable = False
 Grabber_Enable = True
 Set_Bearing_Enable = False
 route_paths = ["routes/can_one_pick_flip.route",
-               "routes/left_sweep.route", "routes/right_sweep.route"]
+               "routes/left_sweep.route", "routes/round_teams_route.txt"]
 # Should we create a debug log even when the calculated position is None?
 debug_log_even_with_no_pos = True
 
