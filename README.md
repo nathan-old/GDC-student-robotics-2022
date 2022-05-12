@@ -7,43 +7,11 @@ After powering on the robot, wait for either of the preboot audio status and the
 # Folders
 - 3d parts: Will contain cad designs relevant to the robot
 - Docs: all relevant documentation to do with the hardware
-- Robert: The code that Robert has written (may be moved and changed)
+- robot: The code that was written and run for the competition
 - Arduino: Contains the scripts for the Arduino
 - demos: Demonstration scripts that dont interface with any other robot code to prove consepts
-- Robot: original robot modules and code
 
-# TODO
-- Offset for camera to robot centre
-- Offset to grabber
-- Flag mount
-- Cable management
-- Create spare part assemblies
-- Hard-coded movement instructions
-- Create return to home function
-- Make USB's accessible for COMP mode + code USB stick
-- Improve looks of robot
-- Give robot a name
-- Can recognition library 
-- Decision making system (which can to go for)
-- Update all can locations, marker locations and location of centeral box
-- Make robot do reliable and accurate distances/turns
+# For GDC student robotics 2023
+Feel free to use as much code as you like, the code runs a route from route files. To write a route file refer to the writing routes.md file in Docs folder. The parts in the 3D-parts folder should be up to date with components curr on the robot. In Docs there should also be a Rpm_spreadsheet file that contains the data collected for our motors at given power levels. This is used to give a speed which is then induvidually calibrated per movement function.
 
-# Done
-- ~~Build can grabber~~
-- ~~Build lifting arm~~
-- ~~Get positional mapping working with distance tracking~~
-- ~~Debug display~~
-- ~~Notch mounting plates~~
-- ~~Power switch/ button~~
-- ~~Motor hubs/ grub screws~~
-- ~~Mark motor letters~~
-- ~~Maths for positional data~~
-- ~~RPM for different powers~~
-- ~~Get camera library working~~
-- ~~Create mapping~~
-- ~~Include can locations~~
-- ~~Cut down mounting bolts~~
-- ~~Battery enclosure~~
-- ~~Add GDC Branding~~
-- ~~make PCB for grabber servos and limit switch~~
-- ~~Code to use grabber~~
+Good Luck :)

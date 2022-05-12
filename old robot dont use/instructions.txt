@@ -1,3 +1,0 @@
-take_picture, test
-turn, 180
-take_picture, after_turn
